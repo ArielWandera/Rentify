@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Property extends Model
+{
+    use SoftDeletes;
+    protected $fillable = ['name','description','address','price_per_month','bedrooms','bathrooms','available','owner_id'];
+
+    public function owner(){
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function rentals(){
+        return $this->hasMany(Rental::class);
+    }
+}
