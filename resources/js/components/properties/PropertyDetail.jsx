@@ -9,8 +9,12 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(`/api/properties/${id}`)
+    const token = localStorage.getItem('token');
+    axios.get(`/api/properties/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
       .then((res) => {
         setProperty(res.data);
         setLoading(false);

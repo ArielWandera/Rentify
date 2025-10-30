@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Property extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['name','description','address','price_per_month','bedrooms','bathrooms','available','owner_id'];
+    protected $fillable = ['name','description','address','price_per_month','bedrooms','bathrooms','owner_id'];
 
     public function owner(){
         return $this->belongsTo(User::class, 'owner_id');
@@ -16,5 +16,9 @@ class Property extends Model
 
     public function rentals(){
         return $this->hasMany(Rental::class);
+    }
+
+    public function isAvailable(){
+        return !$this->rentals()->where('status', 'active')->exists();
     }
 }

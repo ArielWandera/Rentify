@@ -7,7 +7,13 @@ export default function PropertyList() {
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/properties').then(res => setProperties(res.data));
+    const token = localStorage.getItem('token');
+    axios.get('/api/properties', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(res => setProperties(res.data));
   }, []);
 
   return (

@@ -9,7 +9,10 @@ class PropertyController extends Controller
 {
     public function index()
     {
-      return Property::with('owner')->get();
+      return Property::with(['owner', 'rentals.tenant.user'])->get()->map(function ($property) {
+        $property->available = $property->isAvailable();
+        return $property;
+      });
     }
 
     public function store(Request $request)
@@ -21,13 +24,12 @@ class PropertyController extends Controller
         'price_per_month' => 'required|numeric|min:0',
         'bedrooms' => 'required|integer|min:1',
         'bathrooms' => 'required|integer|min:1',
-        'available' => 'boolean',
         'owner_id' => 'required|exists:users,id',
       ]);
 
       $property = Property::create($validated);
 
-      return response()->json($property, 201);
+      return response()->json($property->load('owner'), 201);
     }
 
     public function show(Property $property)
@@ -44,13 +46,12 @@ class PropertyController extends Controller
         'price_per_month' => 'numeric|min:0',
         'bedrooms' => 'integer|min:1',
         'bathrooms' => 'integer|min:1',
-        'available' => 'boolean',
         'owner_id' => 'exists:users,id',
       ]);
 
       $property->update($validated);
 
-      return response()->json($property);
+      return response()->json($property->load('owner'));
     }
 
     public function destroy(Property $property)

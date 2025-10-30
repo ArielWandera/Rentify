@@ -1,29 +1,64 @@
 // resources/js/components/dashboard/Dashboard.jsx
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({ 
-    properties: 0, 
-    available: 0, 
-    revenue: 0, 
-    tenants: 0 
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    properties: 0,
+    available: 0,
+    revenue: 0,
+    tenants: 0,
+    totalBalance: 0
   });
 
   useEffect(() => {
-    axios.get('/api/properties')
-      .then(res => {
-        const props = res.data;
-        setStats({
-          properties: props.length,
-          available: props.filter(p => p.available).length,
-          revenue: props.reduce((sum, p) => sum + (p.price_per_month || 0), 0),
-          tenants: props.filter(p => !p.available).length,  // Count occupied properties as tenants
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        // Fetch properties
+        const propertiesRes = await fetch('/api/properties', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
         });
-      })
-      .catch(err => console.error("Failed to load properties:", err));
+        const properties = await propertiesRes.json();
+
+        // Fetch tenants for balance calculation
+        const tenantsRes = await fetch('/api/tenants', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+        const tenants = await tenantsRes.json();
+
+        // Calculate available properties dynamically (no active rentals)
+        const availableCount = properties.filter(p => !p.rentals || p.rentals.length === 0).length;
+
+        // Calculate total potential revenue from all properties
+        const totalRevenue = properties.reduce((sum, p) => sum + (p.price_per_month || 0), 0);
+
+        // Calculate total outstanding balance
+        const totalBalance = tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0);
+
+        setStats({
+          properties: properties.length,
+          available: availableCount,
+          revenue: totalRevenue,
+          tenants: tenants.length,
+          totalBalance: totalBalance
+        });
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+      }
+    };
+
+    fetchStats();
   }, []);
 
   return (

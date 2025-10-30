@@ -15,7 +15,14 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-primary">Rentify Pro</Link>
         <div className="flex items-center space-x-6">
+          <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Dashboard</Link>
           <Link to="/properties" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Properties</Link>
+          {user.role === 'admin' && (
+            <>
+              <Link to="/users" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Users</Link>
+              <Link to="/tenants" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Tenants</Link>
+            </>
+          )}
           <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
             {darkMode ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
           </button>

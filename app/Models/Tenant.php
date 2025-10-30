@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Tenant extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['users','phone','date_of_birth'];
+    protected $fillable = ['user_id','phone','date_of_birth','outstanding_balance'];
 
     public function user(){
         return $this->belongsTo(User::class);

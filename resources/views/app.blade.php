@@ -10,4 +10,21 @@
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
     <div id="root"></div>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rentify</title>
+    <link rel="icon" href="/favicon.ico">
+
+    {{-- 👇 Add this line before the @vite directive --}}
+    @viteReactRefresh
+
+    {{-- 👇 Keep your existing assets --}}
+    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    <div id="root"></div>
+</body>
 </html>
