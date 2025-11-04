@@ -18,7 +18,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:owner,tenant,admin',
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
@@ -38,7 +38,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'string|max:255',
             'email' => 'email|unique:users,email,' . $user->id,
-            'role' => 'in:user,admin',
+            'role' => 'in:owner,tenant,admin',
         ]);
 
         $user->update($validated);

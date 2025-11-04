@@ -14,6 +14,7 @@ export default function Dashboard() {
     tenants: 0,
     totalBalance: 0
   });
+  const [recentPayments, setRecentPayments] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -37,14 +38,24 @@ export default function Dashboard() {
         });
         const tenants = await tenantsRes.json();
 
+        // Fetch recent payments
+        const paymentsRes = await fetch('/api/payments?limit=5', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+        const payments = await paymentsRes.json();
+        setRecentPayments(payments);
+
         // Calculate available properties dynamically (no active rentals)
         const availableCount = properties.filter(p => !p.rentals || p.rentals.length === 0).length;
 
-        // Calculate total potential revenue from all properties
-        const totalRevenue = properties.reduce((sum, p) => sum + (p.price_per_month || 0), 0);
+        // Calculate total actual revenue from payments
+        const totalRevenue = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0) : 0;
 
         // Calculate total outstanding balance
-        const totalBalance = tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0);
+        const totalBalance = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0) : 0;
 
         setStats({
           properties: properties.length,
@@ -67,7 +78,7 @@ export default function Dashboard() {
       <div className="space-y-2">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Welcome back! Here's your portfolio overview.
+          Welcome back, {user?.name}! Here's your portfolio overview.
         </p>
       </div>
 
@@ -94,35 +105,30 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Recent Activity / Notifications Placeholder */}
+      {/* Recent Activity / Notifications */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">New property added</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Sunny Apartments - $2,500/mo</p>
+          {recentPayments.length > 0 ? (
+            recentPayments.map((payment) => (
+              <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Payment Received</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    ${payment.amount_paid} from {payment.rental?.tenant?.user?.name} for {payment.rental?.property?.name}
+                  </p>
+                </div>
+                <span className="text-xs text-gray-500">
+                  {new Date(payment.payment_date).toLocaleDateString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              No recent payments
             </div>
-            <span className="text-xs text-gray-500">2 hours ago</span>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Tenant inquiry</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">John Doe interested in Downtown Loft</p>
-            </div>
-            <span className="text-xs text-gray-500">5 hours ago</span>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Maintenance request</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Plumbing issue at River View Condo</p>
-            </div>
-            <span className="text-xs text-gray-500">1 day ago</span>
-          </div>
+          )}
         </div>
-        <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">
-          Notification system will be implemented here
-        </p>
       </div>
 
       {/* Action Buttons */}

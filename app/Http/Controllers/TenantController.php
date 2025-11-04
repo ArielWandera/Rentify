@@ -84,6 +84,18 @@ class TenantController extends Controller
             'status' => 'active',
         ]);
 
+        // Create initial payment for deposit if provided
+        if ($validated['deposit'] > 0) {
+            Payment::create([
+                'rental_id' => $rental->id,
+                'amount_paid' => $validated['deposit'],
+                'type' => 'deposit',
+                'status' => 'completed',
+                'payment_date' => now(),
+                'notes' => 'Initial deposit payment',
+            ]);
+        }
+
         return response()->json($rental->load(['property', 'tenant.user']), 201);
     }
 

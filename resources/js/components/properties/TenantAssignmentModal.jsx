@@ -27,13 +27,14 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
         },
       });
       const data = await response.json();
-      // Filter tenants who don't have active rentals
-      const availableTenants = data.filter(tenant =>
-        !tenant.rentals || tenant.rentals.length === 0
-      );
-      setTenants(availableTenants);
+      console.log('Fetched tenants:', data); // Debug logging
+      // Filter tenants that have user data
+      const validTenants = Array.isArray(data) ? data.filter(tenant => tenant.user) : [];
+      console.log('Valid tenants with user data:', validTenants); // Debug logging
+      setTenants(validTenants);
     } catch (error) {
       console.error('Error fetching tenants:', error);
+      setErrors({ general: 'Failed to load tenants' });
     }
   };
 
@@ -79,8 +80,8 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="glass rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="glass rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Assign Tenant to {property?.name}

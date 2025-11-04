@@ -125,6 +125,7 @@ export default function UserForm({ user, onClose, onSuccess }) {
               onChange={handleChange}
               className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
             >
+              <option value="owner">Owner</option>
               <option value="tenant">Tenant</option>
               <option value="admin">Admin</option>
             </select>

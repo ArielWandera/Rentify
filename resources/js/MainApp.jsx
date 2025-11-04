@@ -8,6 +8,7 @@ import PropertyForm from './components/properties/PropertyForm';
 import PropertyDetail from './components/properties/PropertyDetail.jsx';
 import Users from './components/users/Users';
 import Tenants from './components/tenants/Tenants';
+import Payments from './components/payments/Payments';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -29,6 +30,7 @@ export default function MainApp() {
           <Route path="/properties/:id/edit" element={<ProtectedRoute><PropertyForm /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
           <Route path="/tenants" element={<ProtectedRoute><Tenants /></ProtectedRoute>} />
+          <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
         </Routes>
       </div>
     </>

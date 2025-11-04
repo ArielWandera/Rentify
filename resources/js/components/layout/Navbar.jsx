@@ -21,7 +21,11 @@ export default function Navbar() {
             <>
               <Link to="/users" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Users</Link>
               <Link to="/tenants" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Tenants</Link>
+              <Link to="/payments" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Payments</Link>
             </>
+          )}
+          {user.role === 'owner' && (
+            <Link to="/tenants" className="text-gray-700 dark:text-gray-300 hover:text-primary transition">Tenants</Link>
           )}
           <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
             {darkMode ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}

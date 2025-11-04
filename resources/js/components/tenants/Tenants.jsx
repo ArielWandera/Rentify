@@ -23,7 +23,7 @@ export default function Tenants() {
         },
       });
       const data = await response.json();
-      setTenants(data);
+      setTenants(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching tenants:', error);
     } finally {
@@ -57,7 +57,7 @@ export default function Tenants() {
     fetchTenants();
   };
 
-  if (user?.role !== 'admin') {
+  if (user?.role !== 'admin' && user?.role !== 'owner') {
     return (
       <div className="container mx-auto px-6 py-8">
         <div className="text-center">
@@ -80,13 +80,15 @@ export default function Tenants() {
     <div className="container mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Tenant Management</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <UserPlusIcon className="h-5 w-5" />
-          Add Tenant
-        </button>
+        {user?.role === 'admin' && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="btn-primary flex items-center gap-2"
+          >
+            <UserPlusIcon className="h-5 w-5" />
+            Add Tenant
+          </button>
+        )}
       </div>
 
       <div className="glass rounded-lg overflow-hidden">
@@ -118,21 +120,25 @@ export default function Tenants() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingTenant(tenant);
-                        setShowForm(true);
-                      }}
-                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(tenant.id)}
-                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+                    {user?.role === 'admin' && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingTenant(tenant);
+                            setShowForm(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(tenant.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
