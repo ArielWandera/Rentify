@@ -9,7 +9,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
   const { user } = useAuth();
   const [showTenantModal, setShowTenantModal] = useState(false);
 
-  const isAvailable = !property.rentals || property.rentals.length === 0;
+  const isAvailable = property.available;
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {

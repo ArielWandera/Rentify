@@ -96,6 +96,11 @@ class TenantController extends Controller
             ]);
         }
 
+        // Increment outstanding balance by first month's rent
+        // (deposit cancels out since it's immediately paid above)
+        $tenant->outstanding_balance += $validated['monthly_rent'];
+        $tenant->save();
+
         return response()->json($rental->load(['property', 'tenant.user']), 201);
     }
 
@@ -122,10 +127,9 @@ class TenantController extends Controller
 
         return response()->json([
             'tenant_id' => $tenant->id,
-            'outstanding_balance' => $tenant->outstanding_balance,
             'total_paid' => $totalPaid,
             'total_owed' => $totalOwed,
-            'current_balance' => $balance,
+            'outstanding_balance' => $balance,
         ]);
     }
 }

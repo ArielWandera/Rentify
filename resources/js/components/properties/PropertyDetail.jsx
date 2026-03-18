@@ -70,7 +70,7 @@ export default function PropertyDetail() {
           <div>
             <p className="text-sm text-gray-500">Monthly Rent</p>
             <p className="text-3xl font-bold text-primary">
-              ${property.price_per_month}
+              ${property.price_per_month?.toLocaleString()}
             </p>
           </div>
 
@@ -90,15 +90,59 @@ export default function PropertyDetail() {
             <span
               className={`inline-block px-4 py-2 rounded-full text-sm font-medium mt-1 ${
                 property.available
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
               }`}
             >
               {property.available ? 'Available for Rent' : 'Currently Occupied'}
             </span>
           </div>
+
+          {property.owner && (
+            <div>
+              <p className="text-sm text-gray-500">Owner</p>
+              <p className="font-medium text-gray-900 dark:text-white">{property.owner.name}</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Description */}
+      {property.description && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Description</h2>
+          <p className="text-gray-600 dark:text-gray-400">{property.description}</p>
+        </div>
+      )}
+
+      {/* Current Tenant Info */}
+      {!property.available && property.rentals?.length > 0 && (() => {
+        const activeRental = property.rentals.find(r => r.status === 'active');
+        if (!activeRental) return null;
+        return (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Current Tenant</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Name</p>
+                <p className="font-medium text-gray-900 dark:text-white">{activeRental.tenant?.user?.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="font-medium text-gray-900 dark:text-white">{activeRental.tenant?.user?.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Lease Start</p>
+                <p className="font-medium text-gray-900 dark:text-white">{new Date(activeRental.start_date).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Monthly Rent</p>
+                <p className="font-medium text-gray-900 dark:text-white">${activeRental.monthly_rent?.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Back Button */}
       <div>

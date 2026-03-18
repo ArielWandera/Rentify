@@ -60,7 +60,7 @@ export default function Tenants() {
 
   if (user?.role !== 'admin' && user?.role !== 'owner') {
     return (
-      <div className="container mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">You don't have permission to view this page.</p>
@@ -71,14 +71,14 @@ export default function Tenants() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center">Loading tenants...</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
       {error && (
         <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
           {error}
