@@ -29,13 +29,24 @@ export function AuthProvider({ children }) {
     setUser(res.data.user);
   };
 
+  const register = async (name, email, password, passwordConfirmation) => {
+    const res = await axios.post('/api/register', {
+      name,
+      email,
+      password,
+      password_confirmation: passwordConfirmation,
+    });
+    localStorage.setItem('token', res.data.token);
+    setUser(res.data.user);
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

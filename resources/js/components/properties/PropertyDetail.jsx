@@ -61,8 +61,14 @@ export default function PropertyDetail() {
       {/* Image + Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Image */}
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-xl h-80 flex items-center justify-center">
-          <span className="text-gray-500">Property Image</span>
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-xl h-80 overflow-hidden">
+          {property.image_url ? (
+            <img src={property.image_url} alt={property.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-gray-500">No image uploaded</span>
+            </div>
+          )}
         </div>
 
         {/* Details */}

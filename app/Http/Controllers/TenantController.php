@@ -6,12 +6,51 @@ use App\Models\Tenant;
 use App\Models\Rental;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TenantController extends Controller
 {
     public function index()
     {
-        return Tenant::with(['user', 'rentals.property'])->get();
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return Tenant::with(['user', 'rentals.property'])->get();
+        }
+
+        if ($user->role === 'owner') {
+            // Only return tenants who have rentals on this owner's properties
+            return Tenant::with(['user', 'rentals.property'])
+                ->whereHas('rentals.property', fn($q) => $q->where('owner_id', $user->id))
+                ->get();
+        }
+
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+
+    public function me()
+    {
+        $user = Auth::user();
+        $tenant = Tenant::with(['rentals.property', 'rentals.payments'])
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$tenant) {
+            return response()->json(['tenant' => null]);
+        }
+
+        $activeRental = $tenant->rentals->firstWhere('status', 'active');
+
+        $payments = $tenant->rentals
+            ->flatMap(fn($r) => $r->payments)
+            ->sortByDesc('payment_date')
+            ->values();
+
+        return response()->json([
+            'tenant'        => $tenant,
+            'active_rental' => $activeRental,
+            'payments'      => $payments,
+        ]);
     }
 
     public function store(Request $request)

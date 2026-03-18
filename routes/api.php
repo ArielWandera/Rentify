@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('/user', [AuthController::class, 'user']);
   Route::apiResource('properties', PropertyController::class);
   Route::apiResource('users', UserController::class);
+  Route::get('/tenants/me', [TenantController::class, 'me']);
   Route::apiResource('tenants', TenantController::class);
   Route::post('/tenants/{tenant}/assign-property', [TenantController::class, 'assignProperty']);
   Route::post('/tenants/{tenant}/unassign-property/{rental}', [TenantController::class, 'unassignProperty']);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -51,6 +51,10 @@ export default function Login() {
         </form>
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           Demo: admin@rentify.pro / password
+        </p>
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-primary hover:underline font-medium">Create one</Link>
         </p>
       </div>
     </div>

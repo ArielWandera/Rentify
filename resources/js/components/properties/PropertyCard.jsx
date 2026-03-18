@@ -34,8 +34,14 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover transition-all duration-300">
       {/* Image */}
-      <div className="bg-gray-200 dark:bg-gray-700 h-48 flex items-center justify-center">
-        <span className="text-gray-500 text-sm">Property Image</span>
+      <div className="h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        {property.image_url ? (
+          <img src={property.image_url} alt={property.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No image</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
