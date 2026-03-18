@@ -10,6 +10,7 @@ export default function PropertyForm() {
   const isEdit = !!id;
   const { user } = useAuth();
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     if (isEdit) {
@@ -46,7 +47,10 @@ export default function PropertyForm() {
       },
     })
       .then(() => navigate('/properties'))
-      .catch(err => console.error(err));
+      .catch(err => {
+        const message = err.response?.data?.message || 'Something went wrong. Please try again.';
+        setSubmitError(message);
+      });
   };
 
   return (
@@ -78,6 +82,11 @@ export default function PropertyForm() {
           </div>
         </div>
 
+        {submitError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+            {submitError}
+          </div>
+        )}
         <button type="submit" className="btn-primary w-full py-3">Save</button>
       </form>
     </div>

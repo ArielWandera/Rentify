@@ -7,6 +7,7 @@ export default function Tenants() {
   const { user } = useAuth();
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
 
@@ -25,7 +26,7 @@ export default function Tenants() {
       const data = await response.json();
       setTenants(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching tenants:', error);
+      setError('Failed to load tenants. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -78,6 +79,11 @@ export default function Tenants() {
 
   return (
     <div className="container mx-auto px-6 py-8">
+      {error && (
+        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Tenant Management</h1>
         {user?.role === 'admin' && (
@@ -103,7 +109,15 @@ export default function Tenants() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {tenants.map((tenant) => (
+            {tenants.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="px-6 py-12 text-center">
+                  <UserPlusIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No tenants yet</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add a tenant to get started.</p>
+                </td>
+              </tr>
+            ) : tenants.map((tenant) => (
               <tr key={tenant.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{tenant.user?.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tenant.user?.email}</td>
@@ -144,6 +158,7 @@ export default function Tenants() {
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
 

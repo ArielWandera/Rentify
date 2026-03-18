@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PropertyController extends Controller
 {
@@ -39,6 +40,11 @@ class PropertyController extends Controller
 
     public function update(Request $request, Property $property)
     {
+      $user = Auth::user();
+      if ($user->role !== 'admin' && $property->owner_id !== $user->id) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+      }
+
       $validated = $request->validate([
         'name' => 'string|max:255',
         'description' => 'nullable|string',
@@ -56,6 +62,11 @@ class PropertyController extends Controller
 
     public function destroy(Property $property)
     {
+      $user = Auth::user();
+      if ($user->role !== 'admin' && $property->owner_id !== $user->id) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+      }
+
       $property->delete();
 
       return response()->json(null, 204);

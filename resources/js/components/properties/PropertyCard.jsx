@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import TenantAssignmentModal from './TenantAssignmentModal';
 
-export default function PropertyCard({ property, onDelete }) {
+export default function PropertyCard({ property, onDelete, onUpdate }) {
   const { user } = useAuth();
   const [showTenantModal, setShowTenantModal] = useState(false);
 
@@ -113,8 +113,7 @@ export default function PropertyCard({ property, onDelete }) {
           onClose={() => setShowTenantModal(false)}
           onSuccess={() => {
             setShowTenantModal(false);
-            // Refresh the property list or update the property status
-            window.location.reload();
+            onUpdate?.();
           }}
         />
       )}

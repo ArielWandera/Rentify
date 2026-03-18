@@ -1,7 +1,6 @@
 // resources/js/components/dashboard/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
@@ -48,14 +47,14 @@ export default function Dashboard() {
         const payments = await paymentsRes.json();
         setRecentPayments(payments);
 
-        // Calculate available properties dynamically (no active rentals)
-        const availableCount = properties.filter(p => !p.rentals || p.rentals.length === 0).length;
+        // Calculate available properties (backend already computes this)
+        const availableCount = Array.isArray(properties) ? properties.filter(p => p.available).length : 0;
 
-        // Calculate total actual revenue from payments
-        const totalRevenue = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0) : 0;
+        // Total revenue = sum of all completed payments
+        const totalRevenue = Array.isArray(payments) ? payments.reduce((sum, p) => sum + parseFloat(p.amount_paid || 0), 0) : 0;
 
-        // Calculate total outstanding balance
-        const totalBalance = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + (t.outstanding_balance || 0), 0) : 0;
+        // Total outstanding balance = what tenants still owe
+        const totalBalance = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + parseFloat(t.outstanding_balance || 0), 0) : 0;
 
         setStats({
           properties: properties.length,

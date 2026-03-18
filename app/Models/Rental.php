@@ -18,7 +18,7 @@ class Rental extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function payment(){
+    public function payments(){
         return $this->hasMany(Payment::class);
     }
 }

@@ -7,6 +7,7 @@ export default function Users() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
@@ -25,7 +26,7 @@ export default function Users() {
       const data = await response.json();
       setUsers(data);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      setError('Failed to load users. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -78,6 +79,11 @@ export default function Users() {
 
   return (
     <div className="container mx-auto px-6 py-8">
+      {error && (
+        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">User Management</h1>
         <button
@@ -101,7 +107,15 @@ export default function Users() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {users.map((user) => (
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="px-6 py-12 text-center">
+                  <UserPlusIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users yet</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add a user to get started.</p>
+                </td>
+              </tr>
+            ) : users.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>

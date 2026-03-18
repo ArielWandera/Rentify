@@ -16,13 +16,19 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
+function GuestRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div></div>;
+  return user ? <Navigate to="/" /> : children;
+}
+
 export default function MainApp() {
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/properties" element={<ProtectedRoute><PropertyList /></ProtectedRoute>} />
           <Route path="/properties/new" element={<ProtectedRoute><PropertyForm /></ProtectedRoute>} />

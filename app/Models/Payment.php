@@ -10,7 +10,7 @@ class Payment extends Model
     use SoftDeletes;
     protected $fillable = ['rental_id','amount_paid','type','status','notes','payment_date'];
 
-    public function rentals(){
+    public function rental(){
         return $this->belongsTo(Rental::class);
     }
 }
