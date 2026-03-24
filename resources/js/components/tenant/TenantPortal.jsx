@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { HomeIcon, CurrencyDollarIcon, CalendarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, CurrencyDollarIcon, CheckCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import PaymentModal from './PaymentModal';
 
 export default function TenantPortal() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,6 +25,35 @@ export default function TenantPortal() {
       .catch(() => setError('Failed to load your rental information.'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const trackingId = searchParams.get('OrderTrackingId') || localStorage.getItem('pesapal_tracking_id');
+    if (!trackingId) return;
+
+    setCheckingPayment(true);
+    const token = localStorage.getItem('token');
+    fetch(`/api/payments/pesapal/status/${trackingId}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    })
+      .then(r => r.json())
+      .then(result => {
+        if (result.status === 1) {
+          setPaymentStatus({ type: 'success', message: `Payment of UGX ${parseFloat(result.amount).toLocaleString()} confirmed!` });
+          localStorage.removeItem('pesapal_tracking_id');
+          setSearchParams({});
+          // Refresh data
+          fetch('/api/tenants/me', { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
+            .then(r => r.json())
+            .then(setData);
+        } else if (result.status === 2) {
+          setPaymentStatus({ type: 'error', message: 'Payment failed. Please try again.' });
+          localStorage.removeItem('pesapal_tracking_id');
+          setSearchParams({});
+        }
+        // status 0 = still pending, don't clear
+      })
+      .finally(() => setCheckingPayment(false));
+  }, [data]);
 
   if (loading) return (
     <div className="flex justify-center items-center h-64">
@@ -49,9 +84,28 @@ export default function TenantPortal() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Rental</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Welcome back, {user?.name}</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Rental</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Welcome back, {user?.name}</p>
+        </div>
+        <button
+          onClick={() => {
+            const token = localStorage.getItem('token');
+            fetch('/api/reports/tenant', { headers: { Authorization: `Bearer ${token}` } })
+              .then(r => r.blob())
+              .then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `rental-statement-${new Date().toISOString().slice(0,10)}.pdf`;
+                a.click();
+              });
+          }}
+          className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition"
+        >
+          <ArrowDownTrayIcon className="h-4 w-4" />
+          Download Statement
+        </button>
       </div>
 
       {/* Balance Card */}
@@ -59,7 +113,25 @@ export default function TenantPortal() {
         <p className="text-sm opacity-90">Outstanding Balance</p>
         <p className="text-4xl font-bold mt-1">${parseFloat(tenant.outstanding_balance || 0).toLocaleString()}</p>
         <p className="text-sm opacity-90 mt-1">{tenant.outstanding_balance > 0 ? 'Payment due' : 'All paid up'}</p>
+        {tenant.outstanding_balance > 0 && (
+          <button
+            onClick={() => setShowPayModal(true)}
+            className="mt-3 bg-white text-red-500 hover:bg-red-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
+          >
+            Pay Now
+          </button>
+        )}
       </div>
+
+      {paymentStatus && (
+        <div className={`px-4 py-3 rounded-lg text-sm ${
+          paymentStatus.type === 'success'
+            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'
+            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
+        }`}>
+          {paymentStatus.message}
+        </div>
+      )}
 
       {/* Active Rental */}
       {activeRental ? (
@@ -153,6 +225,13 @@ export default function TenantPortal() {
           </div>
         )}
       </div>
+      {showPayModal && activeRental && (
+        <PaymentModal
+          rental={activeRental}
+          outstandingBalance={tenant.outstanding_balance}
+          onClose={() => setShowPayModal(false)}
+        />
+      )}
     </div>
   );
 }
