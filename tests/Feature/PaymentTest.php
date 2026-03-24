@@ -79,6 +79,22 @@ class PaymentTest extends TestCase
             ->assertJsonCount(3);
     }
 
+    public function test_balance_does_not_go_negative(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $token = $admin->createToken('test')->plainTextToken;
+        ['rental' => $rental, 'tenant' => $tenant] = $this->setupRental();
+
+        // Pay more than the outstanding balance
+        $this->withToken($token)->postJson("/api/rentals/{$rental->id}/payments", [
+            'amount_paid'  => 999999,
+            'type'         => 'rent',
+            'payment_date' => now()->toDateString(),
+        ]);
+
+        $this->assertEquals(0, $tenant->fresh()->outstanding_balance);
+    }
+
     public function test_unauthenticated_cannot_access_payments(): void
     {
         $this->getJson('/api/payments')->assertStatus(401);

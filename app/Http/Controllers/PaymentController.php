@@ -49,9 +49,13 @@ class PaymentController extends Controller
 
         $payment = Payment::create($validated);
 
-        // Update tenant's outstanding balance
+        // Update tenant's outstanding balance, floor at 0
         if (in_array($validated['type'], ['rent', 'deposit'])) {
-            $rental->tenant()->decrement('outstanding_balance', $validated['amount_paid']);
+            $tenant = $rental->tenant;
+            if ($tenant) {
+                $tenant->outstanding_balance = max(0, $tenant->outstanding_balance - $validated['amount_paid']);
+                $tenant->save();
+            }
         }
 
         return response()->json($payment->load(['rental.tenant.user', 'rental.property']), 201);

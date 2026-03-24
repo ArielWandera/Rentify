@@ -190,7 +190,8 @@ class PesapalController extends Controller
         ]);
 
         if ($rental->tenant) {
-            $rental->tenant->decrement('outstanding_balance', $amount);
+            $rental->tenant->outstanding_balance = max(0, $rental->tenant->outstanding_balance - $amount);
+            $rental->tenant->save();
         }
     }
 }
