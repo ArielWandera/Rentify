@@ -36,7 +36,7 @@ class TenantController extends Controller
             ->first();
 
         if (!$tenant) {
-            return response()->json(['tenant' => null]);
+            return response()->json(['message' => 'No tenant record found for this user.'], 404);
         }
 
         $activeRental = $tenant->rentals->firstWhere('status', 'active');

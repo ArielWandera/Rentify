@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import TenantForm from './TenantForm';
-import { PencilIcon, TrashIcon, UserPlusIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, UserPlusIcon, CurrencyDollarIcon, BellIcon } from '@heroicons/react/24/outline';
 
 export default function Tenants() {
   const { user } = useAuth();
@@ -10,6 +10,8 @@ export default function Tenants() {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
+  const [reminderStatus, setReminderStatus] = useState(null);
+  const [sendingReminders, setSendingReminders] = useState(false);
 
   useEffect(() => {
     fetchTenants();
@@ -86,16 +88,55 @@ export default function Tenants() {
       )}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Tenant Management</h1>
-        {user?.role === 'admin' && (
+        <div className="flex gap-3">
           <button
-            onClick={() => setShowForm(true)}
-            className="btn-primary flex items-center gap-2"
+            onClick={async () => {
+              setSendingReminders(true);
+              setReminderStatus(null);
+              try {
+                const res = await fetch('/api/reminders/send-all', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                });
+                const data = await res.json();
+                setReminderStatus({ type: 'success', message: data.message });
+              } catch {
+                setReminderStatus({ type: 'error', message: 'Failed to send reminders.' });
+              } finally {
+                setSendingReminders(false);
+              }
+            }}
+            disabled={sendingReminders}
+            className="flex items-center gap-2 border border-yellow-400 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
           >
-            <UserPlusIcon className="h-5 w-5" />
-            Add Tenant
+            <BellIcon className="h-5 w-5" />
+            {sendingReminders ? 'Sending...' : 'Send Reminders'}
           </button>
-        )}
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="btn-primary flex items-center gap-2"
+            >
+              <UserPlusIcon className="h-5 w-5" />
+              Add Tenant
+            </button>
+          )}
+        </div>
       </div>
+
+      {reminderStatus && (
+        <div className={`mb-6 px-4 py-3 rounded-lg text-sm ${
+          reminderStatus.type === 'success'
+            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'
+            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
+        }`}>
+          {reminderStatus.message}
+        </div>
+      )}
 
       <div className="glass rounded-lg overflow-hidden">
         <table className="w-full">

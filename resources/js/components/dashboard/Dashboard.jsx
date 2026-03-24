@@ -1,7 +1,7 @@
 // resources/js/components/dashboard/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Dashboard() {
@@ -131,19 +131,33 @@ export default function Dashboard() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          to="/properties/new"
-          className="btn-primary text-center px-6 py-3 rounded-lg font-medium"
-        >
+      <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+        <Link to="/properties/new" className="btn-primary text-center px-6 py-3 rounded-lg font-medium">
           + Add Property
         </Link>
-        <Link
-          to="/properties"
-          className="border border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-lg font-medium text-center transition"
-        >
+        <Link to="/properties" className="border border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-lg font-medium text-center transition">
           View All Properties
         </Link>
+        <a
+          href={user?.role === 'admin' ? '/api/reports/admin' : '/api/reports/owner'}
+          onClick={e => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const url = user?.role === 'admin' ? '/api/reports/admin' : '/api/reports/owner';
+            fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+              .then(r => r.blob())
+              .then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `rentify-report-${new Date().toISOString().slice(0,10)}.pdf`;
+                a.click();
+              });
+          }}
+          className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-medium transition"
+        >
+          <ArrowDownTrayIcon className="h-5 w-5" />
+          Download Report
+        </a>
       </div>
     </div>
   );

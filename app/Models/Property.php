@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Property extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
     protected $fillable = ['name','description','address','price_per_month','bedrooms','bathrooms','owner_id'];
 
     public function owner(){

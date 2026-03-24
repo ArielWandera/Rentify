@@ -50,10 +50,8 @@ class PaymentController extends Controller
         $payment = Payment::create($validated);
 
         // Update tenant's outstanding balance
-        if ($validated['type'] === 'rent' || $validated['type'] === 'deposit') {
-            $tenant = $rental->tenant;
-            $tenant->outstanding_balance -= $validated['amount_paid'];
-            $tenant->save();
+        if (in_array($validated['type'], ['rent', 'deposit'])) {
+            $rental->tenant()->decrement('outstanding_balance', $validated['amount_paid']);
         }
 
         return response()->json($payment->load(['rental.tenant.user', 'rental.property']), 201);
@@ -98,6 +96,6 @@ class PaymentController extends Controller
 
         $payment->delete();
 
-        return response()->json(['message' => 'Payment deleted successfully']);
+        return response()->json(null, 204);
     }
 }

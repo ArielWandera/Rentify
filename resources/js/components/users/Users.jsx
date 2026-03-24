@@ -24,7 +24,7 @@ export default function Users() {
         },
       });
       const data = await response.json();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       setError('Failed to load users. Please try again.');
     } finally {
@@ -115,27 +115,27 @@ export default function Users() {
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add a user to get started.</p>
                 </td>
               </tr>
-            ) : users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+            ) : users.map((u) => (
+              <tr key={u.id}>
+                <td className="px-6 py-4 whitespace-nowrap">{u.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{u.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${
-                    user.role === 'admin'
+                    u.role === 'admin'
                       ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                   }`}>
-                    {user.role}
+                    {u.role}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {new Date(u.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
-                        setEditingUser(user);
+                        setEditingUser(u);
                         setShowForm(true);
                       }}
                       className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
@@ -143,7 +143,7 @@ export default function Users() {
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDelete(u.id)}
                       className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                     >
                       <TrashIcon className="h-5 w-5" />
