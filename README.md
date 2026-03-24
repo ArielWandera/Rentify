@@ -1,61 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Rentify
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A property management SaaS system for landlords and tenants, built with Laravel 12, React 19, and PostgreSQL.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Multi-role auth** — Admin, Owner (landlord), Tenant with role-scoped views
+- **Property management** — CRUD with image uploads, availability tracking
+- **Tenant portal** — view rental details, payment history, outstanding balance
+- **Payments** — manual recording + Pesapal mobile money integration (MTN MoMo, Airtel Money, card)
+- **PDF reports** — downloadable reports per role (admin: system overview, owner: portfolio, tenant: rental statement)
+- **Email reminders** — manual trigger or monthly scheduled payment reminders via Gmail SMTP
+- **Owner scoping** — owners only see their own properties and tenants
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 12, PHP 8.2+ |
+| Frontend | React 19, Vite, Tailwind CSS v4 |
+| Database | PostgreSQL (SQLite for tests) |
+| Auth | Laravel Sanctum (token-based) |
+| PDF | barryvdh/laravel-dompdf |
+| Email | Gmail SMTP via Laravel Mail |
+| Payments | Pesapal v3 API |
+| Storage | Laravel Storage (local / S3-compatible) |
 
-## Learning Laravel
+## Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Requirements
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- PHP 8.2+, Composer
+- Node.js 20+, npm
+- PostgreSQL
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Install
 
-## Laravel Sponsors
+```bash
+# Clone and install backend
+cd laravel
+composer install
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Copy and configure env
+cp .env.example .env
+php artisan key:generate
 
-### Premium Partners
+# Configure .env (database, mail, Pesapal — see below)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Run migrations and seed
+php artisan migrate --seed
 
-## Contributing
+# Link storage for image serving
+php artisan storage:link
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Install and build frontend
+npm install
+npm run dev
+```
 
-## Code of Conduct
+### Environment Variables
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+# Database
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=rentify
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
 
-## Security Vulnerabilities
+# Mail (Gmail SMTP)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your@gmail.com
+MAIL_FROM_NAME=Rentify
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Pesapal (mobile money)
+PESAPAL_CONSUMER_KEY=your_key
+PESAPAL_CONSUMER_SECRET=your_secret
+PESAPAL_IPN_ID=your_ipn_id
+PESAPAL_SANDBOX=true
+PESAPAL_CALLBACK_URL=http://localhost:5173/my-rental
+```
 
-## License
+## Roles
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Role | Access |
+|---|---|
+| `admin` | Full system access — all users, properties, tenants, payments, reports |
+| `owner` | Own properties and their tenants/payments only |
+| `tenant` | Tenant portal — own rental details, payment history, pay via Pesapal |
+
+Public registration creates a `tenant` account. Admins promote users to `owner` via the Users page.
+
+## API Routes
+
+All routes are prefixed `/api/`. Protected routes require `Authorization: Bearer {token}`.
+
+### Auth
+| Method | Route | Description |
+|---|---|---|
+| POST | `/login` | Get token |
+| POST | `/register` | Create tenant account |
+| GET | `/user` | Get authenticated user |
+
+### Properties
+| Method | Route | Roles |
+|---|---|---|
+| GET | `/properties` | All (scoped by owner) |
+| POST | `/properties` | Admin, Owner |
+| GET | `/properties/{id}` | All |
+| PUT | `/properties/{id}` | Admin, Owner (own) |
+| DELETE | `/properties/{id}` | Admin, Owner (own) |
+
+### Tenants
+| Method | Route | Roles |
+|---|---|---|
+| GET | `/tenants` | Admin, Owner (scoped) |
+| GET | `/tenants/me` | Tenant |
+| POST | `/tenants/{id}/assign-property` | Admin, Owner |
+| POST | `/tenants/{id}/unassign-property/{rental}` | Admin, Owner |
+
+### Payments
+| Method | Route | Description |
+|---|---|---|
+| GET | `/payments` | List payments |
+| POST | `/payments` | Record manual payment |
+| POST | `/payments/pesapal/initiate` | Start Pesapal payment |
+| GET | `/payments/pesapal/status/{trackingId}` | Check payment status |
+| GET | `/payments/pesapal/ipn` | Pesapal IPN webhook (public) |
+
+### Reports
+| Method | Route | Role |
+|---|---|---|
+| GET | `/reports/admin` | Admin |
+| GET | `/reports/owner` | Owner |
+| GET | `/reports/tenant` | Tenant |
+
+### Reminders
+| Method | Route | Roles |
+|---|---|---|
+| POST | `/reminders/send-all` | Admin, Owner |
+| POST | `/reminders/tenant/{id}` | Admin, Owner |
+
+## Pesapal Setup
+
+1. Register at [pesapal.com](https://pesapal.com) → get sandbox credentials
+2. Add credentials to `.env`
+3. Register IPN URL (one-time, as admin):
+   ```
+   POST /api/payments/pesapal/register-ipn
+   ```
+4. Copy the returned `ipn_id` into `.env` as `PESAPAL_IPN_ID`
+5. For production: set `PESAPAL_SANDBOX=false` and update `PESAPAL_CALLBACK_URL`
+
+## Running Tests
+
+```bash
+cd laravel
+php artisan test
+```
+
+Tests use an in-memory SQLite database and do not affect your development data.
+
+## Scheduled Jobs
+
+The system runs a monthly payment reminder email on the 1st of each month at 08:00. To enable this in production, add the Laravel scheduler to your server's crontab:
+
+```cron
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
