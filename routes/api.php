@@ -10,8 +10,10 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\PesapalController;
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
 Route::middleware('auth:sanctum')->group(function () {
   Route::get('/user', [AuthController::class, 'user']);
   Route::apiResource('properties', PropertyController::class);
