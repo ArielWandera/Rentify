@@ -10,22 +10,27 @@ use Illuminate\Support\Facades\Auth;
 
 class TenantController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        $user       = Auth::user();
+        $unassigned = $request->boolean('unassigned');
 
         if ($user->role === 'admin') {
-            return Tenant::with(['user', 'rentals.property'])->get();
+            $query = Tenant::with(['user', 'rentals.property']);
+        } elseif ($user->role === 'owner') {
+            // Owners only see tenants they created
+            $query = Tenant::with(['user', 'rentals.property'])
+                ->where('owner_id', $user->id);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        if ($user->role === 'owner') {
-            // Only return tenants who have rentals on this owner's properties
-            return Tenant::with(['user', 'rentals.property'])
-                ->whereHas('rentals.property', fn($q) => $q->where('owner_id', $user->id))
-                ->get();
+        // Filter to tenants without an active rental (for assignment modal)
+        if ($unassigned) {
+            $query->whereDoesntHave('rentals', fn($q) => $q->where('status', 'active'));
         }
 
-        return response()->json(['error' => 'Unauthorized'], 403);
+        return $query->get();
     }
 
     public function me()
@@ -55,25 +60,52 @@ class TenantController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:tenants',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
+        $authUser = Auth::user();
+
+        $request->validate([
+            'name'                => 'required|string|max:255',
+            'email'               => 'required|email|unique:users,email',
+            'password'            => 'nullable|string|min:8',
+            'phone'               => 'nullable|string|max:20',
+            'date_of_birth'       => 'nullable|date',
             'outstanding_balance' => 'numeric|min:0',
         ]);
 
-        $tenant = Tenant::create($validated);
+        // Create the user account for the tenant
+        $tenantUser = \App\Models\User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => bcrypt($request->password ?? 'password'),
+            'role'     => 'tenant',
+        ]);
+
+        $tenant = Tenant::create([
+            'user_id'             => $tenantUser->id,
+            'owner_id'            => $authUser->role === 'owner' ? $authUser->id : null,
+            'phone'               => $request->phone,
+            'date_of_birth'       => $request->date_of_birth,
+            'outstanding_balance' => $request->outstanding_balance ?? 0,
+        ]);
 
         return response()->json($tenant->load('user'), 201);
     }
 
     public function show(Tenant $tenant)
     {
+        $user = Auth::user();
+        if ($user->role === 'owner' && $tenant->owner_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         return response()->json($tenant->load(['user', 'rentals.property', 'rentals.payments']));
     }
 
     public function update(Request $request, Tenant $tenant)
     {
+        $user = Auth::user();
+        if ($user->role === 'owner' && $tenant->owner_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $validated = $request->validate([
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date',
@@ -87,7 +119,11 @@ class TenantController extends Controller
 
     public function destroy(Tenant $tenant)
     {
-        // Check if tenant has active rentals
+        $user = Auth::user();
+        if ($user->role === 'owner' && $tenant->owner_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         if ($tenant->rentals()->where('status', 'active')->exists()) {
             return response()->json(['error' => 'Cannot delete tenant with active rentals'], 400);
         }
@@ -99,6 +135,8 @@ class TenantController extends Controller
 
     public function assignProperty(Request $request, Tenant $tenant)
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
             'property_id' => 'required|exists:properties,id',
             'start_date' => 'required|date',
@@ -107,8 +145,15 @@ class TenantController extends Controller
             'deposit' => 'numeric|min:0',
         ]);
 
-        // Check if property is available
-        $property = \App\Models\Property::find($validated['property_id']);
+        $property = \App\Models\Property::findOrFail($validated['property_id']);
+
+        // Owners can only assign their own tenants to their own properties
+        if ($user->role === 'owner') {
+            if ($tenant->owner_id !== $user->id || $property->owner_id !== $user->id) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
+
         if (!$property->isAvailable()) {
             return response()->json(['error' => 'Property is not available'], 400);
         }

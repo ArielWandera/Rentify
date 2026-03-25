@@ -33,7 +33,7 @@ class PropertyController extends Controller
             'price_per_month' => 'required|numeric|min:0',
             'bedrooms'        => 'required|integer|min:1',
             'bathrooms'       => 'required|integer|min:1',
-            'owner_id'        => 'required|exists:users,id',
+            'owner_id'        => ['required', \Illuminate\Validation\Rule::exists('users', 'id')->where('role', 'owner')],
             'image'           => 'nullable|image|max:2048',
         ]);
 

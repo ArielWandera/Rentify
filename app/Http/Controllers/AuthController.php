@@ -21,7 +21,7 @@ class AuthController extends Controller
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'role' => $request->role ?? 'tenant',
+        'role' => 'tenant', // public registration is always tenant; admins create owners via /api/users
       ]);
 
       $token = $user->createToken('api-token')->plainTextToken;

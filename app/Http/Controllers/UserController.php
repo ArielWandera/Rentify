@@ -8,9 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return User::with('tenant')->get();
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $query = User::with('tenant');
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+        return $query->get();
     }
 
     public function store(Request $request)
