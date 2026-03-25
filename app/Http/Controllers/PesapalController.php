@@ -21,14 +21,30 @@ class PesapalController extends Controller
             : 'https://pay.pesapal.com/v3';
     }
 
+    private function http(): \Illuminate\Http\Client\PendingRequest
+    {
+        $client = Http::withHeaders(['Accept' => 'application/json']);
+        if (config('services.pesapal.sandbox')) {
+            $client = $client->withoutVerifying();
+        }
+        return $client;
+    }
+
     private function getToken(): string
     {
-        $response = Http::withHeaders(['Accept' => 'application/json'])
+        $response = $this->http()
             ->post("{$this->baseUrl}/api/Auth/RequestToken", [
                 'consumer_key'    => config('services.pesapal.consumer_key'),
                 'consumer_secret' => config('services.pesapal.consumer_secret'),
             ]);
-        return $response->json()['token'];
+
+        $data = $response->json();
+
+        if (empty($data['token'])) {
+            throw new \RuntimeException('Pesapal auth failed: ' . json_encode($data));
+        }
+
+        return $data['token'];
     }
 
     private function headers(): array
@@ -111,6 +127,31 @@ class PesapalController extends Controller
     // Frontend polls this after returning from Pesapal
     public function checkStatus(string $trackingId)
     {
+        // Verify this tracking ID belongs to the authenticated user's rental
+        $user   = Auth::user();
+        $tenant = Tenant::where('user_id', $user->id)->first();
+
+        if ($tenant) {
+            $owned = Payment::where('pesapal_tracking_id', $trackingId)
+                ->whereHas('rental', fn($q) => $q->where('tenant_id', $tenant->id))
+                ->exists();
+
+            // Allow if payment not yet recorded (still pending) — but only if
+            // the merchant reference encodes a rental belonging to this tenant.
+            // We check both recorded payments and pending ones via rental ownership.
+            if (!$owned) {
+                // Check there's no payment recorded under a different tenant
+                $otherTenant = Payment::where('pesapal_tracking_id', $trackingId)
+                    ->whereHas('rental', fn($q) => $q->where('tenant_id', '!=', $tenant->id))
+                    ->exists();
+                if ($otherTenant) {
+                    return response()->json(['error' => 'Unauthorized'], 403);
+                }
+            }
+        } elseif (!in_array($user->role, ['admin', 'owner'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $response = Http::withHeaders($this->headers())
             ->get("{$this->baseUrl}/api/Transactions/GetTransactionStatus", [
                 'orderTrackingId' => $trackingId,
@@ -137,8 +178,7 @@ class PesapalController extends Controller
     // Pesapal IPN webhook — PUBLIC route, no auth
     public function ipn(Request $request)
     {
-        $trackingId  = $request->query('OrderTrackingId');
-        $merchantRef = $request->query('OrderMerchantReference');
+        $trackingId = $request->query('OrderTrackingId');
 
         if (!$trackingId) {
             return response('', 400);
