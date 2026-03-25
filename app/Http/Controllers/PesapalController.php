@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentReceipt;
 use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PesapalController extends Controller
@@ -214,12 +216,12 @@ class PesapalController extends Controller
 
         if (!$rentalId) return;
 
-        $rental = Rental::with('tenant')->find($rentalId);
+        $rental = Rental::with(['tenant.user', 'property.owner'])->find($rentalId);
         if (!$rental) return;
 
         $amount = $data['amount'] ?? 0;
 
-        Payment::create([
+        $payment = Payment::create([
             'rental_id'           => $rental->id,
             'amount_paid'         => $amount,
             'type'                => 'rent',
@@ -232,6 +234,12 @@ class PesapalController extends Controller
         if ($rental->tenant) {
             $rental->tenant->outstanding_balance = max(0, $rental->tenant->outstanding_balance - $amount);
             $rental->tenant->save();
+
+            $tenantEmail = $rental->tenant->user?->email;
+            if ($tenantEmail) {
+                $payment->setRelation('rental', $rental);
+                Mail::to($tenantEmail)->send(new PaymentReceipt($payment));
+            }
         }
     }
 }

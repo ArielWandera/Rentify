@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentReceipt;
 use App\Models\Payment;
 use App\Models\Rental;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -58,7 +60,15 @@ class PaymentController extends Controller
             }
         }
 
-        return response()->json($payment->load(['rental.tenant.user', 'rental.property']), 201);
+        $payment->load(['rental.tenant.user', 'rental.property']);
+
+        // Send receipt to tenant
+        $tenantEmail = $payment->rental->tenant?->user?->email;
+        if ($tenantEmail) {
+            Mail::to($tenantEmail)->send(new PaymentReceipt($payment));
+        }
+
+        return response()->json($payment, 201);
     }
 
     public function show(Payment $payment)
