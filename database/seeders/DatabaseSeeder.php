@@ -92,14 +92,15 @@ class DatabaseSeeder extends Seeder
         );
 
         // ── Tenant Profiles ────────────────────────────────────
+        // owner_id tracks which owner manages this tenant
         $tenant1 = Tenant::updateOrCreate(
             ['user_id' => $tenantUser1->id],
-            ['phone' => '256782345678', 'date_of_birth' => '1990-05-14', 'outstanding_balance' => 1500000]
+            ['owner_id' => $owner1->id, 'phone' => '256782345678', 'date_of_birth' => '1990-05-14', 'outstanding_balance' => 1500000]
         );
 
         $tenant2 = Tenant::updateOrCreate(
             ['user_id' => $tenantUser2->id],
-            ['phone' => '256701234567', 'date_of_birth' => '1995-11-22', 'outstanding_balance' => 0]
+            ['owner_id' => $owner2->id, 'phone' => '256701234567', 'date_of_birth' => '1995-11-22', 'outstanding_balance' => 0]
         );
 
         // ── Rentals ────────────────────────────────────────────
