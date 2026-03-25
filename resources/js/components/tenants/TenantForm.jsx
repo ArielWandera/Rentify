@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function TenantForm({ tenant, onClose, onSuccess }) {
-  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
-    user_id: '',
+    name: '',
+    email: '',
+    password: '',
     phone: '',
     date_of_birth: '',
     outstanding_balance: 0,
@@ -13,10 +15,11 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    fetchUsers();
     if (tenant) {
       setFormData({
-        user_id: tenant.user_id || '',
+        name: tenant.user?.name || '',
+        email: tenant.user?.email || '',
+        password: '',
         phone: tenant.phone || '',
         date_of_birth: tenant.date_of_birth || '',
         outstanding_balance: tenant.outstanding_balance || 0,
@@ -24,32 +27,20 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
     }
   }, [tenant]);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Accept': 'application/json',
-        },
-      });
-      const data = await response.json();
-      // Filter out users who are already tenants
-      const tenantUserIds = data.filter(u => u.tenant).map(u => u.id);
-      setUsers(data.filter(u => !tenantUserIds.includes(u.id) || u.id === tenant?.user_id));
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
 
-    try {
-      const url = tenant ? `/api/tenants/${tenant.id}` : '/api/tenants';
-      const method = tenant ? 'PUT' : 'POST';
+    const url = tenant ? `/api/tenants/${tenant.id}` : '/api/tenants';
+    const method = tenant ? 'PUT' : 'POST';
 
+    // On edit we only send the fields the backend accepts for update
+    const body = tenant
+      ? { phone: formData.phone, date_of_birth: formData.date_of_birth, outstanding_balance: formData.outstanding_balance }
+      : formData;
+
+    try {
       const response = await fetch(url, {
         method,
         headers: {
@@ -57,7 +48,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Accept': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -65,10 +56,9 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
       if (response.ok) {
         onSuccess();
       } else {
-        setErrors(data.errors || { general: 'An error occurred' });
+        setErrors(data.errors || { general: data.message || 'An error occurred' });
       }
-    } catch (error) {
-      console.error('Error saving tenant:', error);
+    } catch {
       setErrors({ general: 'Network error occurred' });
     } finally {
       setLoading(false);
@@ -76,15 +66,12 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="glass rounded-lg p-6 w-full max-w-md">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             {tenant ? 'Edit Tenant' : 'Add New Tenant'}
@@ -95,25 +82,49 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">User</label>
-            <select
-              name="user_id"
-              value={formData.user_id}
-              onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
-              required
-              disabled={!!tenant}
-            >
-              <option value="">Select a user</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.email})
-                </option>
-              ))}
-            </select>
-            {errors.user_id && <p className="text-red-500 text-sm mt-1">{errors.user_id[0]}</p>}
-          </div>
+          {!tenant && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Password <span className="text-gray-400 font-normal">(leave blank to use "password")</span>
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                />
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>}
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-1">Phone</label>
@@ -153,9 +164,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
             {errors.outstanding_balance && <p className="text-red-500 text-sm mt-1">{errors.outstanding_balance[0]}</p>}
           </div>
 
-          {errors.general && (
-            <p className="text-red-500 text-sm">{errors.general}</p>
-          )}
+          {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
 
           <div className="flex gap-4 pt-4">
             <button
@@ -175,6 +184,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

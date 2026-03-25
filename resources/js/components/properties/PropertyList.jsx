@@ -60,7 +60,7 @@ export default function PropertyList() {
               key={p.id}
               property={p}
               onDelete={id => setProperties(prev => prev.filter(x => x.id !== id))}
-              onUpdate={fetchProperties}
+              onUpdate={id => setProperties(prev => prev.map(x => x.id === id ? { ...x, available: false } : x))}
             />
           ))}
         </div>

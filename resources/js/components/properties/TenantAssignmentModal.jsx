@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function TenantAssignmentModal({ property, onClose, onSuccess }) {
@@ -20,14 +21,14 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
 
   const fetchTenants = async () => {
     try {
-      const response = await fetch('/api/tenants', {
+      const response = await fetch('/api/tenants?unassigned=1', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Accept': 'application/json',
         },
       });
       const data = await response.json();
-      const validTenants = Array.isArray(data) ? data.filter(tenant => tenant.user) : [];
+      const validTenants = Array.isArray(data) ? data.filter(t => t.user) : [];
       setTenants(validTenants);
     } catch (error) {
       console.error('Error fetching tenants:', error);
@@ -76,9 +77,9 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
     });
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="glass rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Assign Tenant to {property?.name}
@@ -98,6 +99,9 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
               required
             >
               <option value="">Choose a tenant</option>
+              {tenants.length === 0 && (
+                <option disabled>No unassigned tenants available</option>
+              )}
               {tenants.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.user?.name} ({tenant.user?.email})
@@ -202,6 +206,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

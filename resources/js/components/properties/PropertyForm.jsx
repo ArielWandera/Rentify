@@ -14,6 +14,17 @@ export default function PropertyForm() {
   const [submitError, setSubmitError] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [owners, setOwners] = useState([]);
+  const [selectedOwnerId, setSelectedOwnerId] = useState('');
+
+  useEffect(() => {
+    if (user?.role === 'admin' && !isEdit) {
+      const token = localStorage.getItem('token');
+      axios.get('/api/users?role=owner', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      }).then(res => setOwners(Array.isArray(res.data) ? res.data : []));
+    }
+  }, [user, isEdit]);
 
   useEffect(() => {
     if (isEdit) {
@@ -52,7 +63,12 @@ export default function PropertyForm() {
     if (imageFile) formData.append('image', imageFile);
 
     if (!isEdit) {
-      formData.append('owner_id', user.id);
+      const ownerId = user.role === 'admin' ? selectedOwnerId : user.id;
+      if (!ownerId) {
+        setSubmitError('Please select an owner for this property.');
+        return;
+      }
+      formData.append('owner_id', ownerId);
     }
 
     // Laravel requires _method override for PUT with FormData
@@ -80,6 +96,23 @@ export default function PropertyForm() {
         {isEdit ? 'Edit Property' : 'Add Property'}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+        {user?.role === 'admin' && !isEdit && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Owner</label>
+            <select
+              value={selectedOwnerId}
+              onChange={e => setSelectedOwnerId(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              required
+            >
+              <option value="">Select an owner</option>
+              {owners.map(o => (
+                <option key={o.id} value={o.id}>{o.name} ({o.email})</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-1">Name</label>

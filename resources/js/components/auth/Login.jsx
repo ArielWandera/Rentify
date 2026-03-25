@@ -49,9 +49,25 @@ export default function Login() {
           </div>
           <button type="submit" className="w-full btn-primary py-2">Sign in</button>
         </form>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Demo: admin@rentify.pro / password
-        </p>
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-1">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Quick login</p>
+          {[
+            { label: 'Admin', email: 'admin@rentify.com' },
+            { label: 'Owner — John Kamau', email: 'john.kamau@rentify.com' },
+            { label: 'Owner — Sarah Nakato', email: 'sarah.nakato@rentify.com' },
+            { label: 'Tenant — David Ochieng', email: 'david.ochieng@gmail.com' },
+            { label: 'Tenant — Grace Atim', email: 'grace.atim@gmail.com' },
+          ].map(({ label, email }) => (
+            <button
+              key={email}
+              type="button"
+              onClick={() => setForm({ email, password: 'password' })}
+              className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition"
+            >
+              {label} <span className="text-gray-400">{email}</span>
+            </button>
+          ))}
+        </div>
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           Don't have an account?{' '}
           <Link to="/register" className="text-primary hover:underline font-medium">Create one</Link>

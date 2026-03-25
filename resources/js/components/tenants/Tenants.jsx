@@ -137,7 +137,7 @@ export default function Tenants() {
             <BellIcon className="h-5 w-5" />
             {sendingReminders ? 'Sending...' : 'Send Reminders'}
           </button>
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin' || user?.role === 'owner') && (
             <button
               onClick={() => setShowForm(true)}
               className="btn-primary flex items-center gap-2"
@@ -196,7 +196,7 @@ export default function Tenants() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'admin' || user?.role === 'owner') && (
                       <>
                         <button
                           onClick={() => {
