@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { HomeIcon, CurrencyDollarIcon, CheckCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import PaymentModal from './PaymentModal';
@@ -9,51 +8,26 @@ export default function TenantPortal() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
   const [showPayModal, setShowPayModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
-  const [checkingPayment, setCheckingPayment] = useState(false);
 
-  useEffect(() => {
+  const fetchData = () => {
     const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' };
-
-    // Fetch tenant profile (linked to this user)
-    fetch('/api/tenants/me', { headers })
+    fetch('/api/tenants/me', {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    })
       .then(r => r.json())
       .then(setData)
       .catch(() => setError('Failed to load your rental information.'))
       .finally(() => setLoading(false));
-  }, []);
+  };
 
-  useEffect(() => {
-    const trackingId = searchParams.get('OrderTrackingId') || localStorage.getItem('pesapal_tracking_id');
-    if (!trackingId) return;
+  useEffect(() => { fetchData(); }, []);
 
-    setCheckingPayment(true);
-    const token = localStorage.getItem('token');
-    fetch(`/api/payments/pesapal/status/${trackingId}`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    })
-      .then(r => r.json())
-      .then(result => {
-        if (result.status === 1) {
-          setPaymentStatus({ type: 'success', message: `Payment of UGX ${parseFloat(result.amount).toLocaleString()} confirmed!` });
-          localStorage.removeItem('pesapal_tracking_id');
-          setSearchParams({});
-          // Refresh data
-          fetch('/api/tenants/me', { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
-            .then(r => r.json())
-            .then(setData);
-        } else if (result.status === 2) {
-          setPaymentStatus({ type: 'error', message: 'Payment failed. Please try again.' });
-          localStorage.removeItem('pesapal_tracking_id');
-          setSearchParams({});
-        }
-        // status 0 = still pending, don't clear
-      })
-      .finally(() => setCheckingPayment(false));
-  }, [data]);
+  const handlePaymentComplete = ({ amount }) => {
+    setPaymentStatus({ type: 'success', message: `Payment of UGX ${parseFloat(amount).toLocaleString()} confirmed!` });
+    fetchData();
+  };
 
   if (loading) return (
     <div className="flex justify-center items-center h-64">
@@ -111,7 +85,7 @@ export default function TenantPortal() {
       {/* Balance Card */}
       <div className={`p-6 rounded-xl text-white ${tenant.outstanding_balance > 0 ? 'bg-red-500' : 'bg-green-500'}`}>
         <p className="text-sm opacity-90">Outstanding Balance</p>
-        <p className="text-4xl font-bold mt-1">${parseFloat(tenant.outstanding_balance || 0).toLocaleString()}</p>
+        <p className="text-4xl font-bold mt-1">UGX {parseFloat(tenant.outstanding_balance || 0).toLocaleString()}</p>
         <p className="text-sm opacity-90 mt-1">{tenant.outstanding_balance > 0 ? 'Payment due' : 'All paid up'}</p>
         {tenant.outstanding_balance > 0 && (
           <button
@@ -150,7 +124,7 @@ export default function TenantPortal() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Monthly Rent</p>
-              <p className="font-medium text-gray-900 dark:text-white">${parseFloat(activeRental.monthly_rent).toLocaleString()}</p>
+              <p className="font-medium text-gray-900 dark:text-white">UGX {parseFloat(activeRental.monthly_rent).toLocaleString()}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Lease Start</p>
@@ -164,7 +138,7 @@ export default function TenantPortal() {
             )}
             <div>
               <p className="text-sm text-gray-500">Deposit</p>
-              <p className="font-medium text-gray-900 dark:text-white">${parseFloat(activeRental.deposit || 0).toLocaleString()}</p>
+              <p className="font-medium text-gray-900 dark:text-white">UGX {parseFloat(activeRental.deposit || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -198,7 +172,7 @@ export default function TenantPortal() {
                     {new Date(p.payment_date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    ${parseFloat(p.amount_paid).toLocaleString()}
+                    UGX {parseFloat(p.amount_paid).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 capitalize">
@@ -230,6 +204,7 @@ export default function TenantPortal() {
           rental={activeRental}
           outstandingBalance={tenant.outstanding_balance}
           onClose={() => setShowPayModal(false)}
+          onPaymentComplete={handlePaymentComplete}
         />
       )}
     </div>
