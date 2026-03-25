@@ -64,7 +64,7 @@ class PesapalController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $response = Http::withHeaders($this->headers())
+        $response = $this->http()->withHeaders($this->headers())
             ->post("{$this->baseUrl}/api/URLSetup/RegisterIPN", [
                 'url'                  => config('app.url') . '/api/payments/pesapal/ipn',
                 'ipn_notification_type' => 'GET',
@@ -95,7 +95,7 @@ class PesapalController extends Controller
 
         $nameParts = explode(' ', $user->name, 2);
 
-        $response = Http::withHeaders($this->headers())
+        $response = $this->http()->withHeaders($this->headers())
             ->post("{$this->baseUrl}/api/Transactions/SubmitOrderRequest", [
                 'id'              => $merchantRef,
                 'currency'        => 'UGX',
@@ -152,7 +152,7 @@ class PesapalController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $response = Http::withHeaders($this->headers())
+        $response = $this->http()->withHeaders($this->headers())
             ->get("{$this->baseUrl}/api/Transactions/GetTransactionStatus", [
                 'orderTrackingId' => $trackingId,
             ]);
@@ -184,7 +184,7 @@ class PesapalController extends Controller
             return response('', 400);
         }
 
-        $response = Http::withHeaders($this->headers())
+        $response = $this->http()->withHeaders($this->headers())
             ->get("{$this->baseUrl}/api/Transactions/GetTransactionStatus", [
                 'orderTrackingId' => $trackingId,
             ]);
