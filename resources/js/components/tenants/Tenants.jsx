@@ -12,6 +12,7 @@ export default function Tenants() {
   const [editingTenant, setEditingTenant] = useState(null);
   const [reminderStatus, setReminderStatus] = useState(null);
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [sendingReminderTo, setSendingReminderTo] = useState(null);
 
   useEffect(() => {
     fetchTenants();
@@ -58,6 +59,26 @@ export default function Tenants() {
     setShowForm(false);
     setEditingTenant(null);
     fetchTenants();
+  };
+
+  const handleSendReminder = async (tenantId) => {
+    setSendingReminderTo(tenantId);
+    try {
+      const res = await fetch(`/api/reminders/tenant/${tenantId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      setReminderStatus({ type: 'success', message: data.message || 'Reminder sent.' });
+    } catch {
+      setReminderStatus({ type: 'error', message: 'Failed to send reminder.' });
+    } finally {
+      setSendingReminderTo(null);
+    }
   };
 
   if (user?.role !== 'admin' && user?.role !== 'owner') {
@@ -193,6 +214,16 @@ export default function Tenants() {
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       </>
+                    )}
+                    {tenant.outstanding_balance > 0 && (
+                      <button
+                        onClick={() => handleSendReminder(tenant.id)}
+                        disabled={sendingReminderTo === tenant.id}
+                        title="Send payment reminder"
+                        className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 disabled:opacity-50"
+                      >
+                        <BellIcon className="h-5 w-5" />
+                      </button>
                     )}
                   </div>
                 </td>

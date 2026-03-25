@@ -8,8 +8,9 @@ import TenantAssignmentModal from './TenantAssignmentModal';
 export default function PropertyCard({ property, onDelete, onUpdate }) {
   const { user } = useAuth();
   const [showTenantModal, setShowTenantModal] = useState(false);
+  const [locallyAssigned, setLocallyAssigned] = useState(false);
 
-  const isAvailable = property.available;
+  const isAvailable = !locallyAssigned && property.available;
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
@@ -80,7 +81,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
 
           {/* Buttons */}
           <div className="flex gap-2">
-            {isAvailable && user?.role === 'admin' && (
+            {isAvailable && (user?.role === 'admin' || user?.role === 'owner') && (
               <button
                 onClick={() => setShowTenantModal(true)}
                 className="flex-1 text-center bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600 transition"
@@ -118,6 +119,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
           property={property}
           onClose={() => setShowTenantModal(false)}
           onSuccess={() => {
+            setLocallyAssigned(true);
             setShowTenantModal(false);
             onUpdate?.();
           }}

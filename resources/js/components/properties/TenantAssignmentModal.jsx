@@ -27,10 +27,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
         },
       });
       const data = await response.json();
-      console.log('Fetched tenants:', data); // Debug logging
-      // Filter tenants that have user data
       const validTenants = Array.isArray(data) ? data.filter(tenant => tenant.user) : [];
-      console.log('Valid tenants with user data:', validTenants); // Debug logging
       setTenants(validTenants);
     } catch (error) {
       console.error('Error fetching tenants:', error);
