@@ -4,7 +4,7 @@
 
 - [x] **RentalController authorization** — `index()` and `destroy()` have no role/ownership checks. Any authenticated user can view and delete all rentals.
 - [x] **JSON exception handler** — API returns HTML on errors. Add a custom exception handler in `bootstrap/app.php` so all errors return JSON.
-- [ ] **Set `APP_DEBUG=false`** in production `.env` — stack traces are currently exposed to clients.
+- [x] **Set `APP_DEBUG=false`** in production `.env` — stack traces are currently exposed to clients.
 
 ## High Priority (fix before real users)
 
