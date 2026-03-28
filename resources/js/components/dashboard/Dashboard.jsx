@@ -1,163 +1,162 @@
-// resources/js/components/dashboard/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, CheckCircleIcon, CurrencyDollarIcon, UserGroupIcon, ArrowDownTrayIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
+
+function StatCard({ label, value, icon: Icon, accent }) {
+  return (
+    <div className="card p-6 flex items-start justify-between card-hover">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-warm-gray dark:text-gray-400">{label}</p>
+        <p className="text-3xl font-bold text-raisin dark:text-white">{value}</p>
+      </div>
+      <div className={`p-3 rounded-2xl ${accent}`}>
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
-    properties: 0,
-    available: 0,
-    revenue: 0,
-    tenants: 0,
-    totalBalance: 0
-  });
+  const [stats, setStats] = useState({ properties: 0, available: 0, revenue: 0, tenants: 0 });
   const [recentPayments, setRecentPayments] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        // Fetch properties
-        const propertiesRes = await fetch('/api/properties', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        });
-        const properties = await propertiesRes.json();
+        const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
 
-        // Fetch tenants for balance calculation
-        const tenantsRes = await fetch('/api/tenants', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        });
-        const tenants = await tenantsRes.json();
+        const [propertiesRes, tenantsRes, paymentsRes] = await Promise.all([
+          fetch('/api/properties', { headers }),
+          fetch('/api/tenants', { headers }),
+          fetch('/api/payments?limit=5', { headers }),
+        ]);
 
-        // Fetch recent payments
-        const paymentsRes = await fetch('/api/payments?limit=5', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        });
-        const payments = await paymentsRes.json();
-        setRecentPayments(payments);
+        const [properties, tenants, payments] = await Promise.all([
+          propertiesRes.json(),
+          tenantsRes.json(),
+          paymentsRes.json(),
+        ]);
 
-        // Calculate available properties (backend already computes this)
-        const availableCount = Array.isArray(properties) ? properties.filter(p => p.available).length : 0;
-
-        // Total revenue = sum of all completed payments
-        const totalRevenue = Array.isArray(payments) ? payments.reduce((sum, p) => sum + parseFloat(p.amount_paid || 0), 0) : 0;
-
-        // Total outstanding balance = what tenants still owe
-        const totalBalance = Array.isArray(tenants) ? tenants.reduce((sum, t) => sum + parseFloat(t.outstanding_balance || 0), 0) : 0;
-
+        setRecentPayments(Array.isArray(payments) ? payments.slice(0, 5) : []);
         setStats({
-          properties: properties.length,
-          available: availableCount,
-          revenue: totalRevenue,
-          tenants: tenants.length,
-          totalBalance: totalBalance
+          properties: Array.isArray(properties) ? properties.length : 0,
+          available: Array.isArray(properties) ? properties.filter(p => p.available).length : 0,
+          revenue: Array.isArray(payments) ? payments.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0) : 0,
+          tenants: Array.isArray(tenants) ? tenants.length : 0,
         });
       } catch (err) {
-        console.error("Failed to load dashboard data:", err);
+        console.error('Failed to load dashboard data:', err);
       }
     };
-
     fetchStats();
   }, []);
 
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">
+    <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Welcome back, {user?.name}! Here's your portfolio overview.
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Total Properties', value: stats.properties, icon: HomeIcon, color: 'bg-blue-500' },
-          { label: 'Available', value: stats.available, icon: CheckCircleIcon, color: 'bg-green-500' },
-          { label: 'Monthly Revenue', value: `$${stats.revenue?.toLocaleString()}`, icon: CurrencyDollarIcon, color: 'bg-teal-500' },
-          { label: 'Active Tenants', value: stats.tenants, icon: UserGroupIcon, color: 'bg-purple-500' },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className={`${stat.color} text-white p-6 rounded-xl shadow-lg card-hover transform transition-all`}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-raisin dark:text-white">
+            {greeting()}, {user?.name?.split(' ')[0]} 👋
+          </h1>
+          <p className="mt-1 text-warm-gray dark:text-gray-400">Here's what's happening with your portfolio.</p>
+        </div>
+        <div className="flex gap-3">
+          <Link to="/properties/new" className="btn-primary text-sm py-2.5 px-5">
+            + Add property
+          </Link>
+          <button
+            onClick={() => {
+              const token = localStorage.getItem('token');
+              const url = user?.role === 'admin' ? '/api/reports/admin' : '/api/reports/owner';
+              fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+                .then(r => r.blob())
+                .then(blob => {
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `rentify-report-${new Date().toISOString().slice(0, 10)}.pdf`;
+                  a.click();
+                });
+            }}
+            className="btn-outline text-sm py-2.5 px-5 flex items-center gap-2"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold">{stat.value}</p>
-                <p className="text-sm opacity-90">{stat.label}</p>
-              </div>
-              <stat.icon className="h-12 w-12 opacity-90" />
-            </div>
-          </div>
-        ))}
+            <ArrowDownTrayIcon className="h-4 w-4" />
+            Report
+          </button>
+        </div>
       </div>
 
-      {/* Recent Activity / Notifications */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
-        <div className="space-y-4">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Total Properties" value={stats.properties} icon={HomeIcon} accent="bg-primary" />
+        <StatCard label="Available" value={stats.available} icon={CheckCircleIcon} accent="bg-green-500" />
+        <StatCard label="Total Revenue" value={`UGX ${stats.revenue.toLocaleString()}`} icon={CurrencyDollarIcon} accent="bg-amber-500" />
+        <StatCard label="Active Tenants" value={stats.tenants} icon={UserGroupIcon} accent="bg-violet-500" />
+      </div>
+
+      {/* Recent Activity */}
+      <div className="card overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+          <h2 className="text-lg font-bold text-raisin dark:text-white">Recent payments</h2>
+          <Link to="/payments" className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline">
+            View all <ArrowRightIcon className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="divide-y divide-gray-50 dark:divide-gray-800">
           {recentPayments.length > 0 ? (
             recentPayments.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Payment Received</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    ${payment.amount_paid} from {payment.rental?.tenant?.user?.name} for {payment.rental?.property?.name}
+              <div key={payment.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                <div className="flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                    <CurrencyDollarIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-raisin dark:text-white">
+                      {payment.rental?.tenant?.user?.name ?? 'Tenant'}
+                    </p>
+                    <p className="text-xs text-warm-gray dark:text-gray-400">
+                      {payment.rental?.property?.name ?? 'Property'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-raisin dark:text-white">
+                    UGX {parseFloat(payment.amount_paid).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-warm-gray dark:text-gray-400">
+                    {new Date(payment.payment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
                 </div>
-                <span className="text-xs text-gray-500">
-                  {new Date(payment.payment_date).toLocaleDateString()}
-                </span>
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              No recent payments
+            <div className="px-6 py-12 text-center text-warm-gray dark:text-gray-400">
+              <CurrencyDollarIcon className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No payments recorded yet</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-        <Link to="/properties/new" className="btn-primary text-center px-6 py-3 rounded-lg font-medium">
-          + Add Property
+      {/* Quick links */}
+      <div className="flex flex-wrap gap-3">
+        <Link to="/properties" className="btn-outline text-sm py-2.5 px-5">
+          View all properties
         </Link>
-        <Link to="/properties" className="border border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-lg font-medium text-center transition">
-          View All Properties
+        <Link to="/tenants" className="btn-outline text-sm py-2.5 px-5">
+          Manage tenants
         </Link>
-        <a
-          href={user?.role === 'admin' ? '/api/reports/admin' : '/api/reports/owner'}
-          onClick={e => {
-            e.preventDefault();
-            const token = localStorage.getItem('token');
-            const url = user?.role === 'admin' ? '/api/reports/admin' : '/api/reports/owner';
-            fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-              .then(r => r.blob())
-              .then(blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `rentify-report-${new Date().toISOString().slice(0,10)}.pdf`;
-                a.click();
-              });
-          }}
-          className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-medium transition"
-        >
-          <ArrowDownTrayIcon className="h-5 w-5" />
-          Download Report
-        </a>
       </div>
     </div>
   );
