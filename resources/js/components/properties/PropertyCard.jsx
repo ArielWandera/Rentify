@@ -30,10 +30,10 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
 
   return (
     <>
-      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
+      <div className="group bg-white dark:bg-dark-surface rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 border border-gray-100 dark:border-dark-border">
 
         {/* Image */}
-        <div className="relative h-52 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+        <div className="relative h-52 bg-gray-100 dark:bg-dark-elevated overflow-hidden">
           {property.image_url ? (
             <img
               src={property.image_url}
@@ -61,7 +61,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
           {user?.role === 'admin' && (
             <button
               onClick={handleDelete}
-              className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-gray-900/90 rounded-full text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all shadow"
+              className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-dark-surface/90 rounded-full text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all shadow"
               title="Delete property"
             >
               <TrashIcon className="h-4 w-4" />
@@ -98,7 +98,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
             {isAvailable && (user?.role === 'admin' || user?.role === 'owner') && (
               <button
                 onClick={() => setShowTenantModal(true)}
-                className="flex-1 text-center text-sm font-semibold py-2 px-3 rounded-xl border border-gray-200 dark:border-gray-700 text-raisin dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                className="flex-1 text-center text-sm font-semibold py-2 px-3 rounded-xl border border-gray-200 dark:border-dark-border text-raisin dark:text-white hover:bg-gray-50 dark:hover:bg-dark-elevated transition"
               >
                 Add tenant
               </button>

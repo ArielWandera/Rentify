@@ -40,7 +40,7 @@ export default function Login() {
       </div>
 
       {/* Right — form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-gray-950">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-dark-base">
         <div className="w-full max-w-md space-y-8">
           <div>
             <Link to="/" className="text-2xl font-extrabold text-primary">rentify</Link>
@@ -49,7 +49,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl text-sm">
+            <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-400 rounded-xl text-sm">
               {error}
             </div>
           )}
@@ -87,7 +87,7 @@ export default function Login() {
           </form>
 
           {/* Quick login */}
-          <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-4 space-y-1">
+          <div className="border border-gray-100 dark:border-dark-border rounded-xl p-4 space-y-1 dark:bg-dark-surface">
             <p className="text-xs font-semibold text-warm-gray dark:text-gray-400 uppercase tracking-widest mb-3">Quick login (demo)</p>
             {[
               { label: 'Admin', email: 'admin@rentify.com' },
@@ -100,7 +100,7 @@ export default function Login() {
                 key={email}
                 type="button"
                 onClick={() => setForm({ email, password: 'password' })}
-                className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-raisin dark:text-gray-300 transition flex justify-between"
+                className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-elevated text-raisin dark:text-gray-300 transition flex justify-between"
               >
                 <span className="font-medium">{label}</span>
                 <span className="text-warm-gray">{email}</span>

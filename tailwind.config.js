@@ -14,6 +14,14 @@ export default {
         'primary-light': '#FF5A5F',
         raisin: '#222222',
         'warm-gray': '#717171',
+        // Dark mode surface system
+        dark: {
+          base: '#0F0F0F',      // page background
+          surface: '#1A1A1A',   // cards, panels
+          elevated: '#242424',  // inputs, hover states, nested elements
+          border: '#2E2E2E',    // borders
+          muted: '#3A3A3A',     // subtle dividers
+        },
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],

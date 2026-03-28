@@ -107,16 +107,16 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <div className="card overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-dark-border">
           <h2 className="text-lg font-bold text-raisin dark:text-white">Recent payments</h2>
           <Link to="/payments" className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline">
             View all <ArrowRightIcon className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="divide-y divide-gray-50 dark:divide-gray-800">
+        <div className="divide-y divide-gray-50 dark:divide-dark-border">
           {recentPayments.length > 0 ? (
             recentPayments.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+              <div key={payment.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-dark-elevated/50 transition">
                 <div className="flex items-center gap-4">
                   <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
                     <CurrencyDollarIcon className="h-4 w-4 text-green-600 dark:text-green-400" />

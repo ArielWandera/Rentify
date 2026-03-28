@@ -32,7 +32,7 @@ export default function Navbar() {
       ];
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+    <nav className="fixed top-0 z-50 w-full bg-white/95 dark:bg-dark-base/95 backdrop-blur-sm border-b border-gray-100 dark:border-dark-border">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -48,8 +48,8 @@ export default function Navbar() {
               to={to}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 isActive(to)
-                  ? 'bg-gray-100 dark:bg-gray-800 text-raisin dark:text-white'
-                  : 'text-warm-gray dark:text-gray-400 hover:text-raisin dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'bg-gray-100 dark:bg-dark-elevated text-raisin dark:text-white'
+                  : 'text-warm-gray dark:text-gray-400 hover:text-raisin dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-elevated/60'
               }`}
             >
               {label}
@@ -65,7 +65,7 @@ export default function Navbar() {
           >
             {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
-          <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-1.5 hover:shadow-md transition cursor-pointer"
+          <div className="flex items-center gap-2 border border-gray-200 dark:border-dark-border rounded-full px-3 py-1.5 hover:shadow-md transition cursor-pointer"
             onClick={() => { logout(); navigate('/login'); }}
           >
             <UserCircleIcon className="h-6 w-6 text-warm-gray" />
@@ -86,7 +86,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-gray-100 dark:border-dark-border bg-white dark:bg-dark-base px-4 py-3 space-y-1">
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
@@ -94,7 +94,7 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
               className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
                 isActive(to)
-                  ? 'bg-gray-100 dark:bg-gray-800 text-raisin dark:text-white'
+                  ? 'bg-gray-100 dark:bg-dark-elevated text-raisin dark:text-white'
                   : 'text-warm-gray dark:text-gray-400'
               }`}
             >
@@ -102,7 +102,7 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-1">
-            <p className="text-xs text-warm-gray dark:text-gray-400 px-4 mb-2">{user.name}</p>
+            <p className="text-xs text-warm-gray dark:text-gray-500 px-4 mb-2">{user.name}</p>
             <button
               onClick={() => { logout(); navigate('/login'); setMenuOpen(false); }}
               className="w-full btn-primary text-sm py-2.5"
