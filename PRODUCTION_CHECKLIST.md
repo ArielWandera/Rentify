@@ -8,9 +8,9 @@
 
 ## High Priority (fix before real users)
 
-- [ ] **Queue batch reminders** — `ReminderController::sendAll()` sends emails synchronously. Move to a queued job to avoid request timeouts with many tenants. Jobs table already exists.
-- [ ] **RentalController owner isolation** — owners can currently see rentals they don't own.
-- [ ] **Frontend error boundaries** — add React error boundaries so a component crash doesn't take down the whole page.
+- [x] **Queue batch reminders** — `ReminderController::sendAll()` sends emails synchronously. Move to a queued job to avoid request timeouts with many tenants. Jobs table already exists.
+- [x] **RentalController owner isolation** — owners can currently see rentals they don't own.
+- [x] **Frontend error boundaries** — add React error boundaries so a component crash doesn't take down the whole page.
 
 ## Production Configuration
 
