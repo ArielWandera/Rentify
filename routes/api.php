@@ -14,7 +14,7 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
 });
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::get('/user', [AuthController::class, 'user']);
   Route::apiResource('properties', PropertyController::class);
   Route::apiResource('users', UserController::class);
