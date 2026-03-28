@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Navbar from './components/layout/Navbar';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
@@ -36,6 +37,7 @@ export default function MainApp() {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+        <ErrorBoundary>
         <Routes>
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
@@ -49,6 +51,7 @@ export default function MainApp() {
           <Route path="/tenants" element={<ProtectedRoute roles={['admin', 'owner']}><Tenants /></ProtectedRoute>} />
           <Route path="/payments" element={<ProtectedRoute roles={['admin', 'owner']}><Payments /></ProtectedRoute>} />
         </Routes>
+        </ErrorBoundary>
       </div>
     </>
   );
