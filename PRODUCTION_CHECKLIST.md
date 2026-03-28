@@ -22,10 +22,11 @@
 
 ## Nice to Have
 
-- [ ] Error tracking (Sentry) — `composer require sentry/sentry-laravel`
-- [ ] Tests for PesapalController, ReportController, ReminderController
-- [ ] Rate limiting on authenticated API endpoints
-- [ ] Input validation Form Request classes (replace inline validation)
+- [x] Error tracking (Sentry) — set `SENTRY_LARAVEL_DSN` in production `.env` to activate
+- [ ] Tests for PesapalController, ReportController
+- [x] Tests for ReminderController
+- [x] Rate limiting on authenticated API endpoints
+- [x] Input validation Form Request classes (replace inline validation)
 
 ## Pre-Deploy Steps
 
