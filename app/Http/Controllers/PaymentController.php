@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePaymentRequest;
+use App\Http\Requests\UpdatePaymentRequest;
 use App\Mail\PaymentReceipt;
 use App\Models\Payment;
 use App\Models\Rental;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -31,14 +32,9 @@ class PaymentController extends Controller
         return response()->json($payments);
     }
 
-    public function store(Request $request, Rental $rental)
+    public function store(StorePaymentRequest $request, Rental $rental)
     {
-        $validated = $request->validate([
-            'amount_paid' => 'required|numeric|min:0',
-            'type' => 'required|in:rent,deposit,maintenance,other',
-            'payment_date' => 'required|date',
-            'notes' => 'nullable|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         // Check if user has permission to create payment for this rental
         $user = Auth::user();
@@ -81,20 +77,14 @@ class PaymentController extends Controller
         return response()->json($payment->load(['rental.tenant.user', 'rental.property']));
     }
 
-    public function update(Request $request, Payment $payment)
+    public function update(UpdatePaymentRequest $request, Payment $payment)
     {
         $user = Auth::user();
         if ($user->role !== 'admin' && $payment->rental->property->owner_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $validated = $request->validate([
-            'amount_paid' => 'numeric|min:0',
-            'type' => 'in:rent,deposit,maintenance,other',
-            'payment_date' => 'date',
-            'notes' => 'nullable|string|max:500',
-            'status' => 'in:pending,completed,failed',
-        ]);
+        $validated = $request->validated();
 
         $payment->update($validated);
 

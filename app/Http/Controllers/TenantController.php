@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AssignPropertyRequest;
+use App\Http\Requests\StoreTenantRequest;
+use App\Http\Requests\UpdateTenantRequest;
 use App\Models\Tenant;
 use App\Models\Rental;
 use App\Models\Payment;
@@ -58,18 +61,9 @@ class TenantController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreTenantRequest $request)
     {
         $authUser = Auth::user();
-
-        $request->validate([
-            'name'                => 'required|string|max:255',
-            'email'               => 'required|email|unique:users,email',
-            'password'            => 'nullable|string|min:8',
-            'phone'               => 'nullable|string|max:20',
-            'date_of_birth'       => 'nullable|date',
-            'outstanding_balance' => 'numeric|min:0',
-        ]);
 
         // Create the user account for the tenant
         $tenantUser = \App\Models\User::create([
@@ -99,18 +93,14 @@ class TenantController extends Controller
         return response()->json($tenant->load(['user', 'rentals.property', 'rentals.payments']));
     }
 
-    public function update(Request $request, Tenant $tenant)
+    public function update(UpdateTenantRequest $request, Tenant $tenant)
     {
         $user = Auth::user();
         if ($user->role === 'owner' && $tenant->owner_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $validated = $request->validate([
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'outstanding_balance' => 'numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         $tenant->update($validated);
 
@@ -133,17 +123,11 @@ class TenantController extends Controller
         return response()->json(null, 204);
     }
 
-    public function assignProperty(Request $request, Tenant $tenant)
+    public function assignProperty(AssignPropertyRequest $request, Tenant $tenant)
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'property_id' => 'required|exists:properties,id',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'monthly_rent' => 'required|numeric|min:0',
-            'deposit' => 'numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         $property = \App\Models\Property::findOrFail($validated['property_id']);
 

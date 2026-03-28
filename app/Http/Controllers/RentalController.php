@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRentalRequest;
+use App\Http\Requests\UpdateRentalRequest;
 use App\Models\Rental;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RentalController extends Controller
@@ -23,17 +24,9 @@ class RentalController extends Controller
         return $query->get();
     }
 
-    public function store(Request $request)
+    public function store(StoreRentalRequest $request)
     {
-        $validated = $request->validate([
-            'property_id' => 'required|exists:properties,id',
-            'tenant_id' => 'required|exists:tenants,id',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'monthly_rent' => 'required|numeric|min:0',
-            'deposit' => 'numeric|min:0',
-            'status' => 'required|in:active,pending,terminated',
-        ]);
+        $validated = $request->validated();
 
         $rental = Rental::create($validated);
 
@@ -45,15 +38,9 @@ class RentalController extends Controller
         return response()->json($rental->load(['property', 'tenant.user', 'payments']));
     }
 
-    public function update(Request $request, Rental $rental)
+    public function update(UpdateRentalRequest $request, Rental $rental)
     {
-        $validated = $request->validate([
-            'start_date' => 'date',
-            'end_date' => 'nullable|date|after:start_date',
-            'monthly_rent' => 'numeric|min:0',
-            'deposit' => 'numeric|min:0',
-            'status' => 'in:active,pending,terminated',
-        ]);
+        $validated = $request->validated();
 
         $rental->update($validated);
 
