@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Property;
-use App\Models\Rental;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,26 +25,12 @@ class TenantTest extends TestCase
 
     public function test_owner_only_sees_tenants_on_their_properties(): void
     {
-        $owner = User::factory()->create(['role' => 'owner']);
-        $token = $owner->createToken('test')->plainTextToken;
+        $owner      = User::factory()->create(['role' => 'owner']);
+        $token      = $owner->createToken('test')->plainTextToken;
+        $otherOwner = User::factory()->create(['role' => 'owner']);
 
-        $myProperty    = Property::factory()->create(['owner_id' => $owner->id]);
-        $otherOwner    = User::factory()->create(['role' => 'owner']);
-        $otherProperty = Property::factory()->create(['owner_id' => $otherOwner->id]);
-
-        $myTenant    = Tenant::factory()->create();
-        $otherTenant = Tenant::factory()->create();
-
-        Rental::factory()->create([
-            'property_id' => $myProperty->id,
-            'tenant_id'   => $myTenant->id,
-            'status'      => 'active',
-        ]);
-        Rental::factory()->create([
-            'property_id' => $otherProperty->id,
-            'tenant_id'   => $otherTenant->id,
-            'status'      => 'active',
-        ]);
+        Tenant::factory()->count(1)->create(['owner_id' => $owner->id]);
+        Tenant::factory()->count(3)->create(['owner_id' => $otherOwner->id]);
 
         $this->withToken($token)->getJson('/api/tenants')
             ->assertStatus(200)
@@ -75,15 +59,15 @@ class TenantTest extends TestCase
 
     public function test_admin_can_create_tenant(): void
     {
-        $admin     = User::factory()->create(['role' => 'admin']);
-        $token     = $admin->createToken('test')->plainTextToken;
-        $tenantUser = User::factory()->create(['role' => 'tenant']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $token = $admin->createToken('test')->plainTextToken;
 
         $this->withToken($token)->postJson('/api/tenants', [
-            'user_id' => $tenantUser->id,
-            'phone'   => '256700000000',
+            'name'  => 'Jane Tenant',
+            'email' => 'jane@example.com',
+            'phone' => '256700000000',
         ])->assertStatus(201);
 
-        $this->assertDatabaseHas('tenants', ['user_id' => $tenantUser->id]);
+        $this->assertDatabaseHas('users', ['email' => 'jane@example.com', 'role' => 'tenant']);
     }
 }
