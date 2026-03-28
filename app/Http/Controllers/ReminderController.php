@@ -58,6 +58,6 @@ class ReminderController extends Controller
             }
         }
 
-        return response()->json(['message' => "Reminders queued for {$sent} tenant(s)"]);
+        return response()->json(['message' => "Reminders queued for {$sent} tenant(s)", 'queued' => $sent]);
     }
 }
