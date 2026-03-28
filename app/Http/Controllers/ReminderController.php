@@ -53,11 +53,11 @@ class ReminderController extends Controller
 
         foreach ($tenants as $tenant) {
             if ($tenant->user?->email) {
-                Mail::to($tenant->user->email)->send(new PaymentReminder($tenant, $notes));
+                Mail::to($tenant->user->email)->queue(new PaymentReminder($tenant, $notes));
                 $sent++;
             }
         }
 
-        return response()->json(['message' => "Reminders sent to {$sent} tenant(s)"]);
+        return response()->json(['message' => "Reminders queued for {$sent} tenant(s)"]);
     }
 }
