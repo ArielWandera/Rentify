@@ -3,28 +3,28 @@ import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 import { TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import TenantAssignmentModal from './TenantAssignmentModal';
+import ConfirmModal from '../ui/ConfirmModal';
 
 export default function PropertyCard({ property, onDelete, onUpdate }) {
   const { user } = useAuth();
   const [showTenantModal, setShowTenantModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [locallyAssigned, setLocallyAssigned] = useState(false);
 
   const isAvailable = !locallyAssigned && property.available;
 
   const handleDelete = async () => {
-    if (confirm('Delete this property? This cannot be undone.')) {
-      try {
-        const response = await fetch(`/api/properties/${property.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-          },
-        });
-        if (response.ok) onDelete?.(property.id);
-      } catch (error) {
-        console.error('Error deleting property:', error);
-      }
+    try {
+      const response = await fetch(`/api/properties/${property.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json',
+        },
+      });
+      if (response.ok) onDelete?.(property.id);
+    } catch (error) {
+      console.error('Error deleting property:', error);
     }
   };
 
@@ -60,7 +60,7 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
           {/* Delete button */}
           {user?.role === 'admin' && (
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-dark-surface/90 rounded-full text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all shadow"
               title="Delete property"
             >
@@ -128,6 +128,17 @@ export default function PropertyCard({ property, onDelete, onUpdate }) {
             setShowTenantModal(false);
             onUpdate?.();
           }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete property"
+          message={`Are you sure you want to delete "${property.name}"? This cannot be undone.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => { setShowDeleteModal(false); handleDelete(); }}
+          onCancel={() => setShowDeleteModal(false)}
         />
       )}
     </>
