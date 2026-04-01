@@ -15,6 +15,12 @@ php artisan view:cache
 # Run migrations — non-fatal so the container starts even on DB hiccup
 php artisan migrate --force 2>&1 || echo "[entrypoint] WARNING: migrate failed, continuing startup"
 
+# Seed only if no users exist yet
+USER_COUNT=$(php artisan tinker --execute="echo App\Models\User::count();" 2>/dev/null | tail -1)
+if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+  php artisan db:seed --force 2>&1 || echo "[entrypoint] WARNING: seed failed, continuing startup"
+fi
+
 # Create storage symlink if not already done
 php artisan storage:link 2>/dev/null || true
 
