@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('APP_URL') . '/auth/google/callback',
+    ],
+
     'pesapal' => [
         'consumer_key'    => env('PESAPAL_CONSUMER_KEY'),
         'consumer_secret' => env('PESAPAL_CONSUMER_SECRET'),

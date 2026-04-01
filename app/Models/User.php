@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'profile_photo',
         'darkmode',
+        'google_id',
     ];
 
     /**

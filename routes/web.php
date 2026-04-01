@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/{any}', function () {
-//     return view('app');
-// })->where('any','.*');
-Route::get("/", function () {
-    return view("app");
-});
+Route::get('/auth/google', [GoogleAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
+
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');

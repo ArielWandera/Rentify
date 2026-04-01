@@ -40,13 +40,19 @@ export function AuthProvider({ children }) {
     setUser(res.data.user);
   };
 
+  const setUserFromToken = async (token) => {
+    localStorage.setItem('token', token);
+    const res = await axios.get('/api/user', { headers: { Authorization: `Bearer ${token}` } });
+    setUser(res.data);
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, setUserFromToken }}>
       {children}
     </AuthContext.Provider>
   );
