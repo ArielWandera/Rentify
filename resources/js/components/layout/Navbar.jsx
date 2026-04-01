@@ -24,6 +24,7 @@ export default function Navbar() {
           { to: '/users', label: 'Users' },
           { to: '/tenants', label: 'Tenants' },
           { to: '/payments', label: 'Payments' },
+          { to: '/audit-log', label: 'Audit Log' },
         ] : []),
         ...(user.role === 'owner' ? [
           { to: '/tenants', label: 'Tenants' },

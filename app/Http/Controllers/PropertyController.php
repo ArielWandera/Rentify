@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePropertyRequest;
 use App\Http\Requests\UpdatePropertyRequest;
+use App\Models\AuditLog;
 use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,8 @@ class PropertyController extends Controller
         $property = Property::create($validated);
         $property->image_url = $property->image ? Storage::url($property->image) : null;
 
+        AuditLog::record('created', "Property '{$property->name}' created", $property);
+
         return response()->json($property->load('owner'), 201);
     }
 
@@ -66,6 +69,8 @@ class PropertyController extends Controller
         $property->update($validated);
         $property->image_url = $property->image ? Storage::url($property->image) : null;
 
+        AuditLog::record('updated', "Property '{$property->name}' updated", $property);
+
         return response()->json($property->load('owner'));
     }
 
@@ -80,6 +85,7 @@ class PropertyController extends Controller
             Storage::disk('public')->delete($property->image);
         }
 
+        AuditLog::record('deleted', "Property '{$property->name}' deleted", $property);
         $property->delete();
 
         return response()->json(null, 204);
