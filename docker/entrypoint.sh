@@ -12,8 +12,8 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Run migrations automatically on every deploy
-php artisan migrate --force
+# Run migrations — non-fatal so the container starts even on DB hiccup
+php artisan migrate --force 2>&1 || echo "[entrypoint] WARNING: migrate failed, continuing startup"
 
 # Create storage symlink if not already done
 php artisan storage:link 2>/dev/null || true
