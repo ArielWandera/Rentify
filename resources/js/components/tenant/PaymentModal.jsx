@@ -73,75 +73,86 @@ export default function PaymentModal({ rental, outstandingBalance, onClose, onPa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full mx-4 ${iframeUrl ? 'max-w-2xl' : 'max-w-md'}`}>
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <CreditCardIcon className="h-6 w-6 text-primary" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className={`bg-white rounded-2xl shadow-2xl w-full mx-4 ${iframeUrl ? 'max-w-2xl' : 'max-w-md'}`}>
+        <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-raisin flex items-center gap-2">
+            <CreditCardIcon className="h-5 w-5 text-primary" />
             {iframeUrl ? 'Complete Payment' : 'Pay Rent'}
           </h2>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-            <XMarkIcon className="h-6 w-6" />
+          <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
+            <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
         {iframeUrl ? (
           <div className="relative">
             {polling && (
-              <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-white dark:bg-gray-700 rounded-full px-3 py-1 text-xs text-gray-500 dark:text-gray-400 shadow">
+              <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-white rounded-full px-3 py-1 text-xs text-gray-500 shadow">
                 <span className="animate-pulse h-2 w-2 rounded-full bg-primary inline-block"></span>
                 Waiting for payment…
               </div>
             )}
             <iframe
               src={iframeUrl}
-              className="w-full rounded-b-xl"
+              className="w-full rounded-b-2xl"
               style={{ height: '560px', border: 'none' }}
               title="Pesapal Payment"
             />
           </div>
         ) : (
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-5">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
+            {outstandingBalance > 0 && (
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-1">Outstanding Balance</p>
+                <p className="text-2xl font-bold text-red-600">UGX {parseFloat(outstandingBalance).toLocaleString()}</p>
+                <button
+                  type="button"
+                  onClick={() => setAmount(String(outstandingBalance))}
+                  className="mt-2 text-xs font-semibold text-red-500 hover:underline"
+                >
+                  Pay full balance
+                </button>
+              </div>
+            )}
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Amount (UGX)
+              <label className="block text-sm font-semibold text-raisin mb-1.5">
+                Amount to pay (UGX)
               </label>
               <input
                 type="number"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
                 min={500}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Enter amount"
+                className="w-full border-2 border-gray-200 focus:border-primary rounded-xl px-4 py-3 text-raisin text-lg font-semibold focus:outline-none transition"
+                placeholder="e.g. 500,000"
+                autoFocus
               />
-              {outstandingBalance > 0 && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Outstanding balance: UGX {parseFloat(outstandingBalance).toLocaleString()}
-                </p>
-              )}
+              <p className="text-xs text-warm-gray mt-1.5">Minimum payment: UGX 500</p>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-400">
-              Pay securely via MTN MoMo, Airtel Money, or card. The payment page will appear here.
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-warm-gray">
+              Pay securely via MTN MoMo, Airtel Money, or card.
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3">
               <button
                 onClick={handleClose}
-                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                className="flex-1 border border-gray-200 text-warm-gray py-2.5 rounded-xl hover:bg-gray-50 transition font-semibold text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePay}
                 disabled={loading}
-                className="flex-1 btn-primary py-2 disabled:opacity-50"
+                className="flex-1 btn-primary py-2.5 disabled:opacity-50 text-sm"
               >
                 {loading ? 'Loading…' : 'Pay Now'}
               </button>
