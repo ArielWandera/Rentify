@@ -12,7 +12,7 @@ COPY public/ public/
 
 RUN npm run build
 
-# ── Stage 2: production PHP image ────────────────────────────────────────────
+# ── Stage 2: production image (Nginx + PHP-FPM) ───────────────────────────────
 FROM php:8.2-fpm-alpine AS app
 
 # System deps
@@ -23,7 +23,8 @@ RUN apk add --no-cache \
     zip \
     unzip \
     git \
-    supervisor
+    supervisor \
+    nginx
 
 # PHP extensions
 RUN docker-php-ext-install \
@@ -59,7 +60,11 @@ RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
 
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/nginx/railway.conf /etc/nginx/http.d/default.conf
+COPY docker/entrypoint.sh /entrypoint.sh
 
-EXPOSE 9000
+RUN chmod +x /entrypoint.sh
 
-CMD ["php-fpm"]
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]

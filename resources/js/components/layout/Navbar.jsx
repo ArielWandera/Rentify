@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -31,57 +31,83 @@ export default function Navbar() {
         ] : []),
       ];
 
-  const linkClass = (to) =>
-    `transition font-medium ${isActive(to) ? 'text-primary border-b-2 border-primary pb-0.5' : 'text-gray-700 dark:text-gray-300 hover:text-primary'}`;
-
   return (
-    <nav className="glass fixed top-0 z-50 w-full shadow-lg">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">Rentify Pro</Link>
+    <nav className="fixed top-0 z-50 w-full bg-white/95 dark:bg-dark-base/95 backdrop-blur-sm border-b border-gray-100 dark:border-dark-border">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-        {/* Desktop */}
-        <div className="hidden md:flex items-center space-x-6">
+        {/* Logo */}
+        <Link to="/" className="text-xl font-extrabold tracking-tight">
+          <span className="text-primary">rentify</span>
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map(({ to, label }) => (
-            <Link key={to} to={to} className={linkClass(to)}>{label}</Link>
+            <Link
+              key={to}
+              to={to}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                isActive(to)
+                  ? 'bg-gray-100 dark:bg-dark-elevated text-raisin dark:text-white'
+                  : 'text-warm-gray dark:text-gray-400 hover:text-raisin dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-elevated/60'
+              }`}
+            >
+              {label}
+            </Link>
           ))}
-          <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            {darkMode ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
+        </div>
+
+        {/* Desktop right */}
+        <div className="hidden md:flex items-center gap-2">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition text-warm-gray dark:text-gray-400"
+          >
+            {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">{user.name}</span>
-          <button onClick={() => { logout(); navigate('/login'); }} className="btn-primary px-4 py-2 text-sm">Logout</button>
+          <div className="flex items-center gap-2 border border-gray-200 dark:border-dark-border rounded-full px-3 py-1.5 hover:shadow-md transition cursor-pointer"
+            onClick={() => { logout(); navigate('/login'); }}
+          >
+            <UserCircleIcon className="h-6 w-6 text-warm-gray" />
+            <span className="text-sm font-semibold text-raisin dark:text-white truncate max-w-[120px]">{user.name}</span>
+          </div>
         </div>
 
         {/* Mobile controls */}
-        <div className="flex items-center gap-2 md:hidden">
-          <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            {darkMode ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
+        <div className="flex items-center gap-1 md:hidden">
+          <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            {menuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            {menuOpen ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4 space-y-3">
+        <div className="md:hidden border-t border-gray-100 dark:border-dark-border bg-white dark:bg-dark-base px-4 py-3 space-y-1">
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
               onClick={() => setMenuOpen(false)}
-              className={`block py-2 font-medium ${isActive(to) ? 'text-primary' : 'text-gray-700 dark:text-gray-300'}`}
+              className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
+                isActive(to)
+                  ? 'bg-gray-100 dark:bg-dark-elevated text-raisin dark:text-white'
+                  : 'text-warm-gray dark:text-gray-400'
+              }`}
             >
               {label}
             </Link>
           ))}
-          <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{user.name}</p>
+          <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-1">
+            <p className="text-xs text-warm-gray dark:text-gray-500 px-4 mb-2">{user.name}</p>
             <button
               onClick={() => { logout(); navigate('/login'); setMenuOpen(false); }}
-              className="btn-primary px-4 py-2 text-sm w-full"
+              className="w-full btn-primary text-sm py-2.5"
             >
-              Logout
+              Log out
             </button>
           </div>
         </div>
