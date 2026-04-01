@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Rental extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillable =['property_id','tenant_id','start_date','end_date','monthly_rent','deposit','status'];
+    protected $fillable =['property_id','tenant_id','start_date','end_date','monthly_rent','deposit','status','lease_path'];
 
     public function property(){
         return $this->belongsTo(Property::class);
