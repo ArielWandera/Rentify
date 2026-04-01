@@ -8,7 +8,9 @@ use App\Http\Controllers\TenantController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\PesapalController;
+use App\Http\Controllers\RentalController;
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -24,8 +26,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::post('/tenants/{tenant}/unassign-property/{rental}', [TenantController::class, 'unassignProperty']);
   Route::get('/tenants/{tenant}/balance', [TenantController::class, 'getBalance']);
   Route::apiResource('payments', PaymentController::class);
-  Route::apiResource('rentals', \App\Http\Controllers\RentalController::class);
+  Route::apiResource('rentals', RentalController::class);
+  Route::post('/rentals/{rental}/terminate', [RentalController::class, 'terminate']);
+  Route::post('/rentals/{rental}/lease', [RentalController::class, 'uploadLease']);
+  Route::get('/rentals/{rental}/lease', [RentalController::class, 'downloadLease']);
   Route::post('/rentals/{rental}/payments', [PaymentController::class, 'store']);
+
+  // Audit logs (admin only)
+  Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
   // Reports
   Route::get('/reports/admin',  [ReportController::class, 'adminReport']);
