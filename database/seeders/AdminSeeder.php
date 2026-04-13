@@ -9,14 +9,16 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
+        $email    = env('ADMIN_EMAIL', 'admin@rentify.pro');
+        $password = env('ADMIN_PASSWORD', 'ChangeMe123!');
+        $name     = env('ADMIN_NAME', 'Admin');
+
         User::updateOrCreate(
-            ['email' => 'admin@rentify.pro'],
+            ['email' => $email],
             [
-                'name' => 'Admin User',
-                'password' => bcrypt('password'),
-                'role' => 'admin',
-                'dark_mode' => true,
-                'profile_photo' => null,
+                'name'     => $name,
+                'password' => bcrypt($password),
+                'role'     => 'admin',
             ]
         );
     }

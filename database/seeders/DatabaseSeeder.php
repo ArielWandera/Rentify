@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Rental;
 use App\Models\Tenant;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,130 +15,115 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Admin ──────────────────────────────────────────────
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@rentify.com'],
-            ['name' => 'Admin User', 'password' => Hash::make('password'), 'role' => 'admin']
-        );
+        // ── Admin (reads ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME from .env) ──
+        $this->call(AdminSeeder::class);
 
-        // ── Owners ─────────────────────────────────────────────
-        $owner1 = User::updateOrCreate(
+        // ── Owner ──────────────────────────────────────────────────────────────
+        $owner = User::updateOrCreate(
             ['email' => 'john.kamau@rentify.com'],
-            ['name' => 'John Kamau', 'password' => Hash::make('password'), 'role' => 'owner']
+            ['name' => 'John Kamau', 'password' => Hash::make('Password1!'), 'role' => 'owner']
         );
 
-        $owner2 = User::updateOrCreate(
-            ['email' => 'sarah.nakato@rentify.com'],
-            ['name' => 'Sarah Nakato', 'password' => Hash::make('password'), 'role' => 'owner']
-        );
+        // ── Properties ─────────────────────────────────────────────────────────
 
-        // ── Properties ─────────────────────────────────────────
-        $prop1 = Property::updateOrCreate(
-            ['name' => 'Kololo Heights Apartment', 'owner_id' => $owner1->id],
+        // 1. Single-unit property
+        $singleProp = Property::updateOrCreate(
+            ['name' => 'Kololo Heights Apartment', 'owner_id' => $owner->id],
             [
                 'address'         => 'Plot 14, Kololo Hill Drive, Kampala',
-                'description'     => 'Modern 2-bedroom apartment in the heart of Kololo with great city views.',
+                'description'     => 'Modern 2-bedroom apartment in the heart of Kololo with great city views and 24h security.',
                 'price_per_month' => 1500000,
                 'bedrooms'        => 2,
                 'bathrooms'       => 1,
-                'owner_id'        => $owner1->id,
+                'owner_id'        => $owner->id,
             ]
         );
 
-        $prop2 = Property::updateOrCreate(
-            ['name' => 'Ntinda Studio', 'owner_id' => $owner1->id],
+        // 2. Multi-unit property
+        $multiProp = Property::updateOrCreate(
+            ['name' => 'Bukoto Court Apartments', 'owner_id' => $owner->id],
             [
-                'address'         => '22 Ntinda Road, Kampala',
-                'description'     => 'Cozy studio apartment, ideal for a single professional.',
-                'price_per_month' => 700000,
-                'bedrooms'        => 1,
-                'bathrooms'       => 1,
-                'owner_id'        => $owner1->id,
-            ]
-        );
-
-        $prop3 = Property::updateOrCreate(
-            ['name' => 'Entebbe Lakeside Villa', 'owner_id' => $owner2->id],
-            [
-                'address'         => 'Plot 8, Lakeside Crescent, Entebbe',
-                'description'     => 'Spacious 3-bedroom villa with lake views, parking, and garden.',
-                'price_per_month' => 2500000,
-                'bedrooms'        => 3,
-                'bathrooms'       => 2,
-                'owner_id'        => $owner2->id,
-            ]
-        );
-
-        $prop4 = Property::updateOrCreate(
-            ['name' => 'Muyenga Bungalow', 'owner_id' => $owner2->id],
-            [
-                'address'         => '5 Tank Hill Road, Muyenga, Kampala',
-                'description'     => 'Quiet 2-bedroom bungalow in upscale Muyenga neighbourhood.',
-                'price_per_month' => 1800000,
+                'address'         => 'Plot 22, Bukoto Street, Kampala',
+                'description'     => 'Modern apartment block with 3 self-contained units. Each unit has its own kitchen and bathroom. Secure parking, 24h security.',
+                'price_per_month' => 900000,
                 'bedrooms'        => 2,
-                'bathrooms'       => 2,
-                'owner_id'        => $owner2->id,
+                'bathrooms'       => 1,
+                'owner_id'        => $owner->id,
             ]
         );
 
-        // ── Tenant Users ───────────────────────────────────────
-        $tenantUser1 = User::updateOrCreate(
+        // Units — A1 and A2 will be occupied, A3 free
+        $unitA1 = Unit::updateOrCreate(
+            ['property_id' => $multiProp->id, 'unit_number' => 'A1'],
+            ['bedrooms' => 1, 'bathrooms' => 1, 'price_per_month' => 750000]
+        );
+        $unitA2 = Unit::updateOrCreate(
+            ['property_id' => $multiProp->id, 'unit_number' => 'A2'],
+            ['bedrooms' => 2, 'bathrooms' => 1, 'price_per_month' => 900000]
+        );
+        Unit::updateOrCreate(
+            ['property_id' => $multiProp->id, 'unit_number' => 'A3'],
+            ['bedrooms' => 3, 'bathrooms' => 2, 'price_per_month' => 1200000]
+        );
+
+        // ── Tenants ────────────────────────────────────────────────────────────
+
+        // Tenant 1: David — Kololo Heights, 1 month arrears (demonstrates outstanding balance + Pay Now)
+        $davidUser = User::updateOrCreate(
             ['email' => 'david.ochieng@gmail.com'],
-            ['name' => 'David Ochieng', 'password' => Hash::make('password'), 'role' => 'tenant']
+            ['name' => 'David Ochieng', 'password' => Hash::make('Password1!'), 'role' => 'tenant']
         );
-
-        $tenantUser2 = User::updateOrCreate(
-            ['email' => 'grace.atim@gmail.com'],
-            ['name' => 'Grace Atim', 'password' => Hash::make('password'), 'role' => 'tenant']
+        $david = Tenant::updateOrCreate(
+            ['user_id' => $davidUser->id],
+            ['owner_id' => $owner->id, 'phone' => '256782345678', 'date_of_birth' => '1990-05-14', 'outstanding_balance' => 1500000]
         );
-
-        // ── Tenant Profiles ────────────────────────────────────
-        // owner_id tracks which owner manages this tenant
-        $tenant1 = Tenant::updateOrCreate(
-            ['user_id' => $tenantUser1->id],
-            ['owner_id' => $owner1->id, 'phone' => '256782345678', 'date_of_birth' => '1990-05-14', 'outstanding_balance' => 1500000]
+        $rentalDavid = Rental::updateOrCreate(
+            ['property_id' => $singleProp->id, 'tenant_id' => $david->id],
+            ['start_date' => '2025-01-01', 'monthly_rent' => 1500000, 'deposit' => 1500000, 'status' => 'active']
         );
-
-        $tenant2 = Tenant::updateOrCreate(
-            ['user_id' => $tenantUser2->id],
-            ['owner_id' => $owner2->id, 'phone' => '256701234567', 'date_of_birth' => '1995-11-22', 'outstanding_balance' => 0]
-        );
-
-        // ── Rentals ────────────────────────────────────────────
-        $rental1 = Rental::updateOrCreate(
-            ['property_id' => $prop1->id, 'tenant_id' => $tenant1->id],
-            [
-                'start_date'   => '2025-01-01',
-                'monthly_rent' => 1500000,
-                'deposit'      => 1500000,
-                'status'       => 'active',
-            ]
-        );
-
-        $rental2 = Rental::updateOrCreate(
-            ['property_id' => $prop3->id, 'tenant_id' => $tenant2->id],
-            [
-                'start_date'   => '2024-09-01',
-                'monthly_rent' => 2500000,
-                'deposit'      => 2500000,
-                'status'       => 'active',
-            ]
-        );
-
-        // ── Payments for tenant1 (has outstanding balance — missed Jan) ──
         foreach (['2025-01-01', '2025-02-01', '2025-03-01'] as $date) {
             Payment::updateOrCreate(
-                ['rental_id' => $rental1->id, 'payment_date' => $date, 'type' => 'rent'],
+                ['rental_id' => $rentalDavid->id, 'payment_date' => $date, 'type' => 'rent'],
                 ['amount_paid' => 1500000, 'status' => 'completed', 'notes' => 'Monthly rent']
             );
         }
 
-        // ── Payments for tenant2 (fully paid up) ──────────────
-        foreach (['2024-09-01', '2024-10-01', '2024-11-01', '2024-12-01', '2025-01-01', '2025-02-01', '2025-03-01'] as $date) {
+        // Tenant 2: Grace — Unit A1, fully paid up (demonstrates clean state + download statement)
+        $graceUser = User::updateOrCreate(
+            ['email' => 'grace.atim@gmail.com'],
+            ['name' => 'Grace Atim', 'password' => Hash::make('Password1!'), 'role' => 'tenant']
+        );
+        $grace = Tenant::updateOrCreate(
+            ['user_id' => $graceUser->id],
+            ['owner_id' => $owner->id, 'phone' => '256701234567', 'date_of_birth' => '1995-11-22', 'outstanding_balance' => 0]
+        );
+        $rentalGrace = Rental::updateOrCreate(
+            ['property_id' => $multiProp->id, 'tenant_id' => $grace->id],
+            ['unit_id' => $unitA1->id, 'start_date' => '2025-02-01', 'monthly_rent' => 750000, 'deposit' => 750000, 'status' => 'active']
+        );
+        foreach (['2025-02-01', '2025-03-01', '2025-04-01'] as $date) {
             Payment::updateOrCreate(
-                ['rental_id' => $rental2->id, 'payment_date' => $date, 'type' => 'rent'],
-                ['amount_paid' => 2500000, 'status' => 'completed', 'notes' => 'Monthly rent']
+                ['rental_id' => $rentalGrace->id, 'payment_date' => $date, 'type' => 'rent'],
+                ['amount_paid' => 750000, 'status' => 'completed', 'notes' => 'Monthly rent']
             );
         }
+
+        // Tenant 3: Amina — Unit A2, 1 month arrears (demonstrates multi-unit occupancy in payout report)
+        $aminaUser = User::updateOrCreate(
+            ['email' => 'amina.nakato@gmail.com'],
+            ['name' => 'Amina Nakato', 'password' => Hash::make('Password1!'), 'role' => 'tenant']
+        );
+        $amina = Tenant::updateOrCreate(
+            ['user_id' => $aminaUser->id],
+            ['owner_id' => $owner->id, 'phone' => '256703456789', 'date_of_birth' => '1992-07-30', 'outstanding_balance' => 900000]
+        );
+        $rentalAmina = Rental::updateOrCreate(
+            ['property_id' => $multiProp->id, 'tenant_id' => $amina->id],
+            ['unit_id' => $unitA2->id, 'start_date' => '2025-03-01', 'monthly_rent' => 900000, 'deposit' => 900000, 'status' => 'active']
+        );
+        Payment::updateOrCreate(
+            ['rental_id' => $rentalAmina->id, 'payment_date' => '2025-03-01', 'type' => 'rent'],
+            ['amount_paid' => 900000, 'status' => 'completed', 'notes' => 'Monthly rent']
+        );
     }
 }
