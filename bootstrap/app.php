@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json(['message' => 'Not found.'], 404);
                 }
                 if ($e instanceof \Illuminate\Validation\ValidationException) {
-                    return response()->json(['message' => 'Validation failed.', 'errors' => $e->errors()], 422);
+                    return response()->json(['message' => $e->getMessage(), 'errors' => $e->errors()], 422);
                 }
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
                 return response()->json(['message' => $e->getMessage() ?: 'Server Error.'], $status);
