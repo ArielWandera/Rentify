@@ -10,7 +10,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         $email    = env('ADMIN_EMAIL', 'admin@rentify.pro');
-        $password = env('ADMIN_PASSWORD', 'ChangeMe123!');
+        $password = env('ADMIN_PASSWORD', 'Password1!');
         $name     = env('ADMIN_NAME', 'Admin');
 
         // Remove any stale admin accounts before creating the definitive one
