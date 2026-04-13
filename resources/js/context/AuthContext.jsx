@@ -47,6 +47,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.post('/api/logout', {}, { headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+    }
     localStorage.removeItem('token');
     setUser(null);
   };

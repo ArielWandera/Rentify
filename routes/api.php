@@ -12,16 +12,25 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\PesapalController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\RentalController;
+use App\Http\Controllers\UnitController;
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::get('/invite/{token}', [InviteController::class, 'show']);
     Route::post('/invite/{token}', [InviteController::class, 'accept']);
 });
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::get('/user', [AuthController::class, 'user']);
+  Route::post('/logout', [AuthController::class, 'logout']);
+  Route::put('/user/password', [AuthController::class, 'changePassword']);
   Route::apiResource('properties', PropertyController::class);
+  Route::get('/properties/{property}/units',  [UnitController::class, 'index']);
+  Route::post('/properties/{property}/units', [UnitController::class, 'store']);
+  Route::put('/units/{unit}',                 [UnitController::class, 'update']);
+  Route::delete('/units/{unit}',              [UnitController::class, 'destroy']);
   Route::apiResource('users', UserController::class);
   Route::get('/tenants/me', [TenantController::class, 'me']);
   Route::apiResource('tenants', TenantController::class);
@@ -39,9 +48,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
   // Reports
-  Route::get('/reports/admin',  [ReportController::class, 'adminReport']);
-  Route::get('/reports/owner',  [ReportController::class, 'ownerReport']);
-  Route::get('/reports/tenant', [ReportController::class, 'tenantReport']);
+  Route::get('/reports/admin',             [ReportController::class, 'adminReport']);
+  Route::get('/reports/owner',             [ReportController::class, 'ownerReport']);
+  Route::get('/reports/tenant',            [ReportController::class, 'tenantReport']);
+  Route::get('/reports/landlord-payouts',  [ReportController::class, 'landlordPayouts']);
 
   // Reminders
   Route::post('/reminders/send-all',          [ReminderController::class, 'sendAll']);

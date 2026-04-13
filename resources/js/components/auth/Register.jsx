@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import PasswordStrength from '../ui/PasswordStrength';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '' });
@@ -100,6 +101,7 @@ export default function Register() {
               onChange={e => setForm({ ...form, password: e.target.value })}
               className={inputClass('password')}
             />
+            <PasswordStrength password={form.password} />
             {fieldErrors.password && <p className="text-red-500 text-xs mt-1">{fieldErrors.password[0]}</p>}
           </div>
           <div>

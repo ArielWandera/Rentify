@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import PasswordStrength from '../ui/PasswordStrength';
 
 export default function AcceptInvite() {
   const { token } = useParams();
@@ -91,6 +92,7 @@ export default function AcceptInvite() {
               onChange={e => setForm({ ...form, password: e.target.value })}
               className="input"
             />
+            <PasswordStrength password={form.password} />
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password[0]}</p>}
           </div>
           <div>

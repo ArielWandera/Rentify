@@ -86,7 +86,10 @@ export default function Login() {
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-sm font-semibold text-raisin dark:text-gray-200">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-semibold text-raisin dark:text-gray-200">Password</label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+              </div>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -105,27 +108,28 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Quick login */}
-          <div className="border border-gray-100 dark:border-dark-border rounded-xl p-4 space-y-1 dark:bg-dark-surface">
-            <p className="text-xs font-semibold text-warm-gray dark:text-gray-400 uppercase tracking-widest mb-3">Quick login (demo)</p>
-            {[
-              { label: 'Admin', email: 'admin@rentify.com' },
-              { label: 'Owner — John Kamau', email: 'john.kamau@rentify.com' },
-              { label: 'Owner — Sarah Nakato', email: 'sarah.nakato@rentify.com' },
-              { label: 'Tenant — David Ochieng', email: 'david.ochieng@gmail.com' },
-              { label: 'Tenant — Grace Atim', email: 'grace.atim@gmail.com' },
-            ].map(({ label, email }) => (
-              <button
-                key={email}
-                type="button"
-                onClick={() => setForm({ email, password: 'password' })}
-                className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-elevated text-raisin dark:text-gray-300 transition flex justify-between"
-              >
-                <span className="font-medium">{label}</span>
-                <span className="text-warm-gray">{email}</span>
-              </button>
-            ))}
-          </div>
+          {/* Demo credentials — remove this block before go-live (set VITE_SHOW_DEMO_HINT=false) */}
+          {import.meta.env.VITE_SHOW_DEMO_HINT !== 'false' && (
+            <div className="border border-gray-100 dark:border-dark-border rounded-xl p-4 space-y-1 dark:bg-dark-surface">
+              <p className="text-xs font-semibold text-warm-gray dark:text-gray-400 uppercase tracking-widest mb-3">Demo accounts · password: Password1!</p>
+              {[
+                { label: 'Admin', email: 'admin@rentify.pro' },
+                { label: 'Landlord — John Kamau', email: 'john.kamau@rentify.com' },
+                { label: 'Tenant — David Ochieng (arrears)', email: 'david.ochieng@gmail.com' },
+                { label: 'Tenant — Grace Atim (paid up)', email: 'grace.atim@gmail.com' },
+              ].map(({ label, email }) => (
+                <button
+                  key={email}
+                  type="button"
+                  onClick={() => setForm({ email, password: 'Password1!' })}
+                  className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-elevated text-raisin dark:text-gray-300 transition flex justify-between"
+                >
+                  <span className="font-medium">{label}</span>
+                  <span className="text-warm-gray">{email}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <p className="text-center text-sm text-warm-gray dark:text-gray-400">
             Don't have an account?{' '}
