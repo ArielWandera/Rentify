@@ -141,6 +141,30 @@ export default function TenantPortal() {
               <p className="font-medium text-gray-900 dark:text-white">UGX {parseFloat(activeRental.deposit || 0).toLocaleString()}</p>
             </div>
           </div>
+
+          {activeRental.lease_path && (
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+              <button
+                onClick={() => {
+                  const token = localStorage.getItem('token');
+                  fetch(`/api/rentals/${activeRental.id}/lease`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  })
+                    .then(r => r.blob())
+                    .then(blob => {
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(blob);
+                      a.download = 'lease-agreement.pdf';
+                      a.click();
+                    });
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 hover:bg-primary/20 text-primary transition"
+              >
+                <ArrowDownTrayIcon className="h-4 w-4" />
+                Download lease agreement
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 text-center text-gray-500">
