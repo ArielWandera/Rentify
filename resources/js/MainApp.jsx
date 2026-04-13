@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import GoogleCallback from './components/auth/GoogleCallback';
+import AcceptInvite from './components/auth/AcceptInvite';
 import Dashboard from './components/dashboard/Dashboard';
 import PropertyList from './components/properties/PropertyList';
 import PropertyForm from './components/properties/PropertyForm';
@@ -44,6 +45,7 @@ export default function MainApp() {
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
           <Route path="/auth/callback" element={<GoogleCallback />} />
+          <Route path="/invite/:token" element={<GuestRoute><AcceptInvite /></GuestRoute>} />
           <Route path="/" element={<ProtectedRoute><HomeRedirect /></ProtectedRoute>} />
           <Route path="/my-rental" element={<ProtectedRoute roles={['tenant']}><TenantPortal /></ProtectedRoute>} />
           <Route path="/properties" element={<ProtectedRoute roles={['admin', 'owner']}><PropertyList /></ProtectedRoute>} />

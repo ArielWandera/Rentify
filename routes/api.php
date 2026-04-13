@@ -10,11 +10,14 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\PesapalController;
+use App\Http\Controllers\InviteController;
 use App\Http\Controllers\RentalController;
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/invite/{token}', [InviteController::class, 'show']);
+    Route::post('/invite/{token}', [InviteController::class, 'accept']);
 });
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::get('/user', [AuthController::class, 'user']);

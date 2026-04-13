@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AssignPropertyRequest;
 use App\Http\Requests\StoreTenantRequest;
 use App\Http\Requests\UpdateTenantRequest;
+use App\Mail\TenantInvite;
+use App\Models\InvitationToken;
 use App\Models\Tenant;
 use App\Models\Rental;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class TenantController extends Controller
 {
@@ -65,11 +69,11 @@ class TenantController extends Controller
     {
         $authUser = Auth::user();
 
-        // Create the user account for the tenant
+        // Create the user account for the tenant (no password yet — set via invite link)
         $tenantUser = \App\Models\User::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => bcrypt($request->password ?? 'password'),
+            'password' => bcrypt(Str::random(32)),
             'role'     => 'tenant',
         ]);
 
@@ -80,6 +84,22 @@ class TenantController extends Controller
             'date_of_birth'       => $request->date_of_birth,
             'outstanding_balance' => $request->outstanding_balance ?? 0,
         ]);
+
+        // Generate invite token and send email
+        $token = InvitationToken::create([
+            'user_id'    => $tenantUser->id,
+            'token'      => Str::random(64),
+            'expires_at' => now()->addHours(48),
+        ]);
+
+        $inviteUrl = config('app.url') . '/invite/' . $token->token;
+
+        Mail::to($tenantUser->email)->queue(new TenantInvite(
+            tenant:       $tenantUser,
+            inviteUrl:    $inviteUrl,
+            propertyName: 'your property',
+            landlordName: $authUser->name,
+        ));
 
         return response()->json($tenant->load('user'), 201);
     }
