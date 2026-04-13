@@ -4,6 +4,8 @@ import Navbar from './components/layout/Navbar';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 import GoogleCallback from './components/auth/GoogleCallback';
 import AcceptInvite from './components/auth/AcceptInvite';
 import Dashboard from './components/dashboard/Dashboard';
@@ -15,6 +17,7 @@ import Tenants from './components/tenants/Tenants';
 import Payments from './components/payments/Payments';
 import TenantPortal from './components/tenant/TenantPortal';
 import AuditLog from './components/admin/AuditLog';
+import LandlordPayouts from './components/admin/LandlordPayouts';
 
 function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
@@ -44,6 +47,8 @@ export default function MainApp() {
         <Routes>
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+          <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
           <Route path="/auth/callback" element={<GoogleCallback />} />
           <Route path="/invite/:token" element={<GuestRoute><AcceptInvite /></GuestRoute>} />
           <Route path="/" element={<ProtectedRoute><HomeRedirect /></ProtectedRoute>} />
@@ -54,6 +59,7 @@ export default function MainApp() {
           <Route path="/properties/:id/edit" element={<ProtectedRoute roles={['admin', 'owner']}><PropertyForm /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute roles={['admin']}><Users /></ProtectedRoute>} />
           <Route path="/audit-log" element={<ProtectedRoute roles={['admin']}><AuditLog /></ProtectedRoute>} />
+          <Route path="/landlord-payouts" element={<ProtectedRoute roles={['admin']}><LandlordPayouts /></ProtectedRoute>} />
           <Route path="/tenants" element={<ProtectedRoute roles={['admin', 'owner']}><Tenants /></ProtectedRoute>} />
           <Route path="/payments" element={<ProtectedRoute roles={['admin', 'owner']}><Payments /></ProtectedRoute>} />
         </Routes>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use App\Models\Tenant;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -73,6 +74,43 @@ class ReportController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('rentify-owner-report-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function landlordPayouts()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $landlords = User::where('role', 'owner')
+            ->with(['properties.rentals.payments', 'properties.rentals.tenant'])
+            ->get()
+            ->map(function ($owner) {
+                $properties = $owner->properties;
+
+                $totalCollected = $properties->flatMap(fn($p) => $p->rentals)
+                    ->flatMap(fn($r) => $r->payments)
+                    ->where('status', 'completed')
+                    ->sum('amount_paid');
+
+                $totalOutstanding = $properties->flatMap(fn($p) => $p->rentals)
+                    ->map(fn($r) => $r->tenant)
+                    ->filter()
+                    ->unique('id')
+                    ->sum('outstanding_balance');
+
+                return [
+                    'id'                => $owner->id,
+                    'name'              => $owner->name,
+                    'email'             => $owner->email,
+                    'properties_count'  => $properties->count(),
+                    'total_collected'   => $totalCollected,
+                    'total_outstanding' => $totalOutstanding,
+                ];
+            });
+
+        return response()->json($landlords);
     }
 
     public function tenantReport()
