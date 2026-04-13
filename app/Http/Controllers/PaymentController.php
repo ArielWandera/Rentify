@@ -61,7 +61,7 @@ class PaymentController extends Controller
         // Send receipt to tenant
         $tenantEmail = $payment->rental->tenant?->user?->email;
         if ($tenantEmail) {
-            Mail::to($tenantEmail)->send(new PaymentReceipt($payment));
+            Mail::to($tenantEmail)->queue(new PaymentReceipt($payment));
         }
 
         return response()->json($payment, 201);

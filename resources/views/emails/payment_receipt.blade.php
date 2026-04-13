@@ -20,6 +20,10 @@
   .details td:first-child { color: #6b7280; width: 45%; }
   .details td:last-child { font-weight: 600; text-align: right; }
   .ref { font-size: 11px; color: #9ca3af; text-align: center; margin-top: 8px; }
+  .qr-stamp { display: flex; align-items: center; gap: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; margin: 20px 0; }
+  .qr-stamp svg { flex-shrink: 0; }
+  .qr-label { font-size: 11px; color: #6b7280; line-height: 1.6; }
+  .qr-label strong { display: block; font-size: 12px; color: #374151; margin-bottom: 2px; }
   .footer { background: #f9fafb; padding: 16px 32px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
 </style>
 </head>
@@ -87,6 +91,16 @@
           </td>
         </tr>
       </table>
+    </div>
+
+    <div class="qr-stamp">
+      {!! $qrSvg !!}
+      <div class="qr-label">
+        <strong>Digital verification stamp</strong>
+        Scan to verify this receipt.<br>
+        Ref: {{ $ref }}<br>
+        Issued by Rentify Property Management
+      </div>
     </div>
 
     <p style="font-size:13px; color:#6b7280;">

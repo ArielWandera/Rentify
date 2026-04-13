@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PaymentReceipt;
 use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Rental;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PaymentTest extends TestCase
@@ -98,5 +100,21 @@ class PaymentTest extends TestCase
     public function test_unauthenticated_cannot_access_payments(): void
     {
         $this->getJson('/api/payments')->assertStatus(401);
+    }
+
+    public function test_receipt_email_queued_when_payment_recorded(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $token = $admin->createToken('test')->plainTextToken;
+        ['rental' => $rental, 'tenantUser' => $tenantUser] = $this->setupRental();
+
+        $this->withToken($token)->postJson("/api/rentals/{$rental->id}/payments", [
+            'amount_paid'  => 500000,
+            'type'         => 'rent',
+            'payment_date' => now()->toDateString(),
+        ])->assertStatus(201);
+
+        Mail::assertQueued(PaymentReceipt::class, fn ($mail) => $mail->hasTo($tenantUser->email));
     }
 }
