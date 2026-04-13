@@ -95,7 +95,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
             <select
               value={selectedTenant}
               onChange={(e) => setSelectedTenant(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             >
               <option value="">Choose a tenant</option>
@@ -119,7 +119,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
                 name="start_date"
                 value={formData.start_date}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                className="input"
                 required
               />
               {errors.start_date && <p className="text-red-500 text-sm mt-1">{errors.start_date[0]}</p>}
@@ -132,7 +132,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
                 name="end_date"
                 value={formData.end_date}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                className="input"
               />
               {errors.end_date && <p className="text-red-500 text-sm mt-1">{errors.end_date[0]}</p>}
             </div>
@@ -148,7 +148,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
                 onChange={handleChange}
                 step="0.01"
                 min="0"
-                className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                className="input"
                 required
               />
               {errors.monthly_rent && <p className="text-red-500 text-sm mt-1">{errors.monthly_rent[0]}</p>}
@@ -163,7 +163,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
                 onChange={handleChange}
                 step="0.01"
                 min="0"
-                className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                className="input"
               />
               {errors.deposit && <p className="text-red-500 text-sm mt-1">{errors.deposit[0]}</p>}
             </div>
@@ -175,7 +175,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             >
               <option value="active">Active</option>
               <option value="pending">Pending</option>

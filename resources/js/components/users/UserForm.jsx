@@ -83,7 +83,7 @@ export default function UserForm({ user, onClose, onSuccess }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             />
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>}
@@ -96,7 +96,7 @@ export default function UserForm({ user, onClose, onSuccess }) {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
@@ -111,7 +111,7 @@ export default function UserForm({ user, onClose, onSuccess }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required={!user}
             />
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>}
@@ -123,7 +123,7 @@ export default function UserForm({ user, onClose, onSuccess }) {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             >
               <option value="owner">Owner</option>
               <option value="tenant">Tenant</option>

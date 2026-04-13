@@ -103,7 +103,7 @@ export default function PropertyForm() {
             <select
               value={selectedOwnerId}
               onChange={e => setSelectedOwnerId(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="input"
               required
             >
               <option value="">Select an owner</option>
@@ -118,7 +118,7 @@ export default function PropertyForm() {
           <label className="block text-sm font-medium mb-1">Name</label>
           <input
             {...register('name', { required: 'Name is required' })}
-            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+            className="input"
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
@@ -128,7 +128,7 @@ export default function PropertyForm() {
           <textarea
             {...register('description')}
             rows={3}
-            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+            className="input resize-none"
             placeholder="Describe the property..."
           />
         </div>
@@ -137,7 +137,7 @@ export default function PropertyForm() {
           <label className="block text-sm font-medium mb-1">Address</label>
           <input
             {...register('address', { required: 'Address is required' })}
-            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+            className="input"
           />
           {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>}
         </div>
@@ -148,7 +148,7 @@ export default function PropertyForm() {
             <input
               type="number"
               {...register('price_per_month', { required: 'Price is required' })}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="input"
             />
             {errors.price_per_month && <p className="text-red-500 text-sm mt-1">{errors.price_per_month.message}</p>}
           </div>
@@ -157,7 +157,7 @@ export default function PropertyForm() {
             <input
               type="number"
               {...register('bedrooms', { required: 'Required', min: { value: 1, message: 'Min 1' } })}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="input"
             />
             {errors.bedrooms && <p className="text-red-500 text-sm mt-1">{errors.bedrooms.message}</p>}
           </div>
@@ -166,7 +166,7 @@ export default function PropertyForm() {
             <input
               type="number"
               {...register('bathrooms', { required: 'Required', min: { value: 1, message: 'Min 1' } })}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="input"
             />
             {errors.bathrooms && <p className="text-red-500 text-sm mt-1">{errors.bathrooms.message}</p>}
           </div>

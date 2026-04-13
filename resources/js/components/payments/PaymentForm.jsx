@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function PaymentForm({ rentals, onClose, onSuccess }) {
@@ -74,7 +74,7 @@ export default function PaymentForm({ rentals, onClose, onSuccess }) {
             <select
               value={selectedRental}
               onChange={(e) => setSelectedRental(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             >
               <option value="">Choose a rental...</option>
@@ -95,7 +95,7 @@ export default function PaymentForm({ rentals, onClose, onSuccess }) {
               onChange={handleChange}
               step="0.01"
               min="0"
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             />
             {errors.amount_paid && <p className="text-red-500 text-sm mt-1">{errors.amount_paid[0]}</p>}
@@ -107,7 +107,7 @@ export default function PaymentForm({ rentals, onClose, onSuccess }) {
               name="type"
               value={formData.type}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             >
               <option value="rent">Rent</option>
               <option value="deposit">Deposit</option>
@@ -124,7 +124,7 @@ export default function PaymentForm({ rentals, onClose, onSuccess }) {
               name="payment_date"
               value={formData.payment_date}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               required
             />
             {errors.payment_date && <p className="text-red-500 text-sm mt-1">{errors.payment_date[0]}</p>}
@@ -137,7 +137,7 @@ export default function PaymentForm({ rentals, onClose, onSuccess }) {
               value={formData.notes}
               onChange={handleChange}
               rows="3"
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
               placeholder="Optional notes about this payment"
             />
             {errors.notes && <p className="text-red-500 text-sm mt-1">{errors.notes[0]}</p>}

@@ -92,7 +92,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="input"
                 />
                 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>}
               </div>
@@ -105,7 +105,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="input"
                 />
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
               </div>
@@ -119,7 +119,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="input"
                 />
                 {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>}
               </div>
@@ -133,7 +133,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             />
             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone[0]}</p>}
           </div>
@@ -145,7 +145,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
               name="date_of_birth"
               value={formData.date_of_birth}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             />
             {errors.date_of_birth && <p className="text-red-500 text-sm mt-1">{errors.date_of_birth[0]}</p>}
           </div>
@@ -159,7 +159,7 @@ export default function TenantForm({ tenant, onClose, onSuccess }) {
               onChange={handleChange}
               step="0.01"
               min="0"
-              className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="input"
             />
             {errors.outstanding_balance && <p className="text-red-500 text-sm mt-1">{errors.outstanding_balance[0]}</p>}
           </div>
