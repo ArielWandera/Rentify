@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InvitationToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class InviteController extends Controller
 {
@@ -33,7 +34,7 @@ class InviteController extends Controller
         }
 
         $request->validate([
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         $user = $record->user;
