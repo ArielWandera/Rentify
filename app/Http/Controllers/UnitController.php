@@ -12,9 +12,17 @@ class UnitController extends Controller
     public function index(Property $property)
     {
         return response()->json(
-            $property->units()->withCount([
-                'rentals as occupied' => fn($q) => $q->where('status', 'active'),
-            ])->get()->map(fn($u) => array_merge($u->toArray(), ['is_occupied' => $u->occupied > 0]))
+            $property->units()->with([
+                'rentals' => fn($q) => $q->where('status', 'active')->with('tenant.user'),
+            ])->get()->map(function ($u) {
+                $activeRental = $u->rentals->first();
+                return array_merge($u->toArray(), [
+                    'is_occupied' => (bool) $activeRental,
+                    'tenant_name' => $activeRental?->tenant?->user?->name,
+                    'tenant_email' => $activeRental?->tenant?->user?->email,
+                    'rental_id' => $activeRental?->id,
+                ]);
+            })
         );
     }
 

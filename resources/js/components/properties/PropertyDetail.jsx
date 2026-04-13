@@ -313,6 +313,7 @@ export default function PropertyDetail() {
                 <th className="pb-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Beds</th>
                 <th className="pb-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Baths</th>
                 <th className="pb-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Price</th>
+                <th className="pb-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tenant</th>
                 <th className="pb-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th>
                 <th className="pb-2" />
               </tr>
@@ -324,6 +325,16 @@ export default function PropertyDetail() {
                   <td className="py-3 text-gray-600 dark:text-gray-300">{unit.bedrooms}</td>
                   <td className="py-3 text-gray-600 dark:text-gray-300">{unit.bathrooms}</td>
                   <td className="py-3 text-right text-gray-900 dark:text-white">UGX {parseFloat(unit.price_per_month).toLocaleString()}</td>
+                  <td className="py-3">
+                    {unit.tenant_name ? (
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{unit.tenant_name}</p>
+                        <p className="text-xs text-gray-400">{unit.tenant_email}</p>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">—</span>
+                    )}
+                  </td>
                   <td className="py-3 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                       unit.is_occupied

@@ -13,6 +13,9 @@ class AdminSeeder extends Seeder
         $password = env('ADMIN_PASSWORD', 'ChangeMe123!');
         $name     = env('ADMIN_NAME', 'Admin');
 
+        // Remove any stale admin accounts before creating the definitive one
+        User::where('role', 'admin')->where('email', '!=', $email)->delete();
+
         User::updateOrCreate(
             ['email' => $email],
             [
