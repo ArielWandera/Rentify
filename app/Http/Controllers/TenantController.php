@@ -158,18 +158,30 @@ class TenantController extends Controller
             }
         }
 
-        if (!$property->isAvailable()) {
-            return response()->json(['error' => 'Property is not available'], 400);
+        // Unit-aware availability check
+        if (!empty($validated['unit_id'])) {
+            $unit = \App\Models\Unit::findOrFail($validated['unit_id']);
+            if ($unit->property_id !== $property->id) {
+                return response()->json(['error' => 'Unit does not belong to this property'], 400);
+            }
+            if ($unit->isOccupied()) {
+                return response()->json(['error' => 'This unit is already occupied'], 400);
+            }
+        } else {
+            if (!$property->isAvailable()) {
+                return response()->json(['error' => 'Property is not available'], 400);
+            }
         }
 
         $rental = Rental::create([
             'property_id' => $validated['property_id'],
-            'tenant_id' => $tenant->id,
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
+            'unit_id'     => $validated['unit_id'] ?? null,
+            'tenant_id'   => $tenant->id,
+            'start_date'  => $validated['start_date'],
+            'end_date'    => $validated['end_date'] ?? null,
             'monthly_rent' => $validated['monthly_rent'],
-            'deposit' => $validated['deposit'] ?? 0,
-            'status' => 'active',
+            'deposit'     => $validated['deposit'] ?? 0,
+            'status'      => 'active',
         ]);
 
         // Create initial payment for deposit if provided

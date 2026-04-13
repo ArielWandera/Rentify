@@ -15,6 +15,7 @@ class AssignPropertyRequest extends FormRequest
     {
         return [
             'property_id'  => 'required|exists:properties,id',
+            'unit_id'      => 'nullable|exists:units,id',
             'start_date'   => 'required|date',
             'end_date'     => 'nullable|date|after:start_date',
             'monthly_rent' => 'required|numeric|min:0',

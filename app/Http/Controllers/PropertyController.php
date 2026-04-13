@@ -46,7 +46,7 @@ class PropertyController extends Controller
     {
         $property->available = $property->isAvailable();
         $property->image_url = $property->image ? Storage::url($property->image) : null;
-        return response()->json($property->load(['owner', 'rentals.tenant.user']));
+        return response()->json($property->load(['owner', 'rentals.tenant.user', 'units']));
     }
 
     public function update(UpdatePropertyRequest $request, Property $property)

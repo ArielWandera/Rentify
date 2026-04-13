@@ -5,6 +5,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 export default function TenantAssignmentModal({ property, onClose, onSuccess }) {
   const [tenants, setTenants] = useState([]);
   const [selectedTenant, setSelectedTenant] = useState('');
+  const [units, setUnits] = useState([]);
+  const [selectedUnit, setSelectedUnit] = useState('');
   const [formData, setFormData] = useState({
     start_date: '',
     end_date: '',
@@ -17,7 +19,19 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
 
   useEffect(() => {
     fetchTenants();
+    fetchUnits();
   }, []);
+
+  const fetchUnits = async () => {
+    try {
+      const res = await fetch(`/api/properties/${property.id}/units`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, Accept: 'application/json' },
+      });
+      const data = await res.json();
+      const available = Array.isArray(data) ? data.filter(u => !u.is_occupied) : [];
+      setUnits(available);
+    } catch {}
+  };
 
   const fetchTenants = async () => {
     try {
@@ -51,6 +65,7 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
         },
         body: JSON.stringify({
           property_id: property.id,
+          ...(selectedUnit ? { unit_id: selectedUnit } : {}),
           ...formData,
         }),
       });
@@ -90,6 +105,29 @@ export default function TenantAssignmentModal({ property, onClose, onSuccess }) 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {units.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Select Unit</label>
+              <select
+                value={selectedUnit}
+                onChange={e => {
+                  setSelectedUnit(e.target.value);
+                  const unit = units.find(u => String(u.id) === e.target.value);
+                  if (unit) setFormData(f => ({ ...f, monthly_rent: unit.price_per_month }));
+                }}
+                className="input"
+                required
+              >
+                <option value="">Choose an available unit</option>
+                {units.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.unit_number} — {u.bedrooms} bed / {u.bathrooms} bath — UGX {parseFloat(u.price_per_month).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-1">Select Tenant</label>
             <select

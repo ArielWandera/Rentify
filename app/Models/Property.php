@@ -19,7 +19,17 @@ class Property extends Model
         return $this->hasMany(Rental::class);
     }
 
-    public function isAvailable(){
+    public function units(){
+        return $this->hasMany(Unit::class);
+    }
+
+    public function isAvailable(): bool
+    {
+        // If property has units, available = at least one unit is unoccupied
+        if ($this->units()->exists()) {
+            return $this->units()->whereDoesntHave('rentals', fn($q) => $q->where('status', 'active'))->exists();
+        }
+        // Single-unit property: available = no active rental
         return !$this->rentals()->where('status', 'active')->exists();
     }
 }
