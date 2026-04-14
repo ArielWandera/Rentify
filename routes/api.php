@@ -27,10 +27,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::put('/user/password', [AuthController::class, 'changePassword']);
   Route::apiResource('properties', PropertyController::class);
-  Route::get('/properties/{property}/units',  [UnitController::class, 'index']);
-  Route::post('/properties/{property}/units', [UnitController::class, 'store']);
-  Route::put('/units/{unit}',                 [UnitController::class, 'update']);
-  Route::delete('/units/{unit}',              [UnitController::class, 'destroy']);
+  Route::get('/properties/{property}/units',          [UnitController::class, 'index']);
+  Route::post('/properties/{property}/units',         [UnitController::class, 'store']);
+  Route::post('/properties/{property}/units/generate',[UnitController::class, 'generate']);
+  Route::post('/properties/{property}/units/bulk',    [UnitController::class, 'bulkUpdate']);
+  Route::put('/units/{unit}',                         [UnitController::class, 'update']);
+  Route::delete('/units/{unit}',                      [UnitController::class, 'destroy']);
   Route::apiResource('users', UserController::class);
   Route::get('/tenants/me', [TenantController::class, 'me']);
   Route::apiResource('tenants', TenantController::class);
