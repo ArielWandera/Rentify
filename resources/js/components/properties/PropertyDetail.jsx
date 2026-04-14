@@ -306,7 +306,8 @@ export default function PropertyDetail() {
         {units.length === 0 ? (
           <p className="text-sm text-gray-400 py-2">No units added yet. This is a single-unit property.</p>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-6 px-6">
+          <table className="w-full text-sm min-w-[520px]">
             <thead>
               <tr className="border-b border-gray-100 dark:border-gray-700">
                 <th className="pb-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Unit</th>
@@ -362,6 +363,7 @@ export default function PropertyDetail() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
