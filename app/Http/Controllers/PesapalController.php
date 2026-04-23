@@ -166,13 +166,17 @@ class PesapalController extends Controller
         $data = $response->json();
         $data['order_tracking_id'] = $trackingId;
 
-        // payment_status_code: 1=completed, 0=invalid, 2=failed, 3=reversed
-        if (($data['payment_status_code'] ?? 0) == 1) {
+        $statusCode = (int) ($data['payment_status_code'] ?? 0);
+        if ($statusCode === 0 && strtolower($data['payment_status_description'] ?? '') === 'completed') {
+            $statusCode = 1;
+        }
+
+        if ($statusCode === 1) {
             $this->recordPayment($data);
         }
 
         return response()->json([
-            'status'      => $data['payment_status_code'] ?? 0,
+            'status'      => $statusCode,
             'description' => $data['payment_status_description'] ?? 'Unknown',
             'amount'      => $data['amount'] ?? null,
         ]);
@@ -195,7 +199,13 @@ class PesapalController extends Controller
         if ($response->successful()) {
             $data = $response->json();
             $data['order_tracking_id'] = $trackingId;
-            if (($data['payment_status_code'] ?? 0) == 1) {
+
+            $statusCode = (int) ($data['payment_status_code'] ?? 0);
+            if ($statusCode === 0 && strtolower($data['payment_status_description'] ?? '') === 'completed') {
+                $statusCode = 1;
+            }
+
+            if ($statusCode === 1) {
                 $this->recordPayment($data);
             }
         }
