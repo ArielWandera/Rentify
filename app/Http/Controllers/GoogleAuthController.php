@@ -35,7 +35,7 @@ class GoogleAuthController extends Controller
                     'name'      => $googleUser->getName(),
                     'email'     => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'role'      => 'tenant',
+                    'role'      => 'owner',
                 ]);
             }
         }
