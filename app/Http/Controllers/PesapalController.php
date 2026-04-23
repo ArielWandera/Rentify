@@ -164,6 +164,7 @@ class PesapalController extends Controller
         }
 
         $data = $response->json();
+        $data['order_tracking_id'] = $trackingId;
 
         // payment_status_code: 1=completed, 0=invalid, 2=failed, 3=reversed
         if (($data['payment_status_code'] ?? 0) == 1) {
@@ -193,6 +194,7 @@ class PesapalController extends Controller
 
         if ($response->successful()) {
             $data = $response->json();
+            $data['order_tracking_id'] = $trackingId;
             if (($data['payment_status_code'] ?? 0) == 1) {
                 $this->recordPayment($data);
             }

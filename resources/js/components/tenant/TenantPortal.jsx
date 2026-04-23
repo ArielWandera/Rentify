@@ -227,7 +227,7 @@ export default function TenantPortal() {
         <PaymentModal
           rental={activeRental}
           outstandingBalance={tenant.outstanding_balance}
-          onClose={() => setShowPayModal(false)}
+          onClose={() => { setShowPayModal(false); fetchData(); }}
           onPaymentComplete={handlePaymentComplete}
         />
       )}

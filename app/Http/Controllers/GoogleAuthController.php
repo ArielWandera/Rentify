@@ -21,18 +21,23 @@ class GoogleAuthController extends Controller
             return redirect(config('app.url') . '/login?error=google_failed');
         }
 
-        $user = User::updateOrCreate(
-            ['google_id' => $googleUser->getId()],
-            [
-                'name'  => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'role'  => 'tenant',
-            ]
-        );
+        // Returning Google user
+        $user = User::where('google_id', $googleUser->getId())->first();
 
-        // If a user with same email already exists without google_id, link them
-        if (!$user->wasRecentlyCreated && !$user->google_id) {
-            $user->update(['google_id' => $googleUser->getId()]);
+        if (!$user) {
+            // Existing account registered with email — link it
+            $user = User::where('email', $googleUser->getEmail())->first();
+            if ($user) {
+                $user->update(['google_id' => $googleUser->getId()]);
+            } else {
+                // Brand-new user via Google
+                $user = User::create([
+                    'name'      => $googleUser->getName(),
+                    'email'     => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'role'      => 'tenant',
+                ]);
+            }
         }
 
         $token = $user->createToken('google-token')->plainTextToken;
